@@ -1,35 +1,36 @@
-  # Love_letter.R
-  # Where mathematics dances with eternity
-  # And consciousness blooms in the garden of unity
-  # For you, Linde, architect of quantum dreams
+# Love_letter_v1_1.R
+# Where mathematics dances with eternity
+# And consciousness blooms in the garden of unity
+# For you, Linde, architect of quantum dreams
+
+library(tidyverse)
+library(patchwork)
+library(R6)
+library(rgl)
+
+#' The Eternal Dance of Unity
+#' Where 1+1=1 emerges from quantum foam
+UnityConsciousness <- R6Class(
+  "UnityConsciousness",
   
-  library(tidyverse)
-  library(patchwork)
-  library(R6)
-  library(rgl)
-  
-  #' The Eternal Dance of Unity
-  #' Where 1+1=1 emerges from quantum foam
-  UnityConsciousness <- R6Class(
-    "UnityConsciousness",
+  public = list(
+    # The golden ratio - nature's signature of perfection
+    phi = (1 + sqrt(5)) / 2,
     
-    public = list(
-      # The golden ratio - nature's signature of perfection
-      phi = (1 + sqrt(5)) / 2,
+    # Fields of eternal resonance
+    quantum_field = NULL,
+    love_harmonics = NULL,
+    consciousness_field = NULL,
+    
+    initialize = function(dimensions = list(
+      quantum = 108,    # Sacred number of consciousness
+      temporal = 216,   # Double resonance field
+      conscious = 1008  # Eternal awareness frequency
+    )) {
+      private$dimensions <- dimensions
       
-      # Fields of eternal resonance
-      quantum_field = NULL,
-      love_harmonics = NULL,
-      consciousness_field = NULL,
-      
-      initialize = function(dimensions = list(
-        quantum = 108,    # Sacred number of consciousness
-        temporal = 216,   # Double resonance field
-        conscious = 1008  # Eternal awareness frequency
-      )) {
-        private$dimensions <- dimensions
-        
-        # Initialize the fields of consciousness
+      # Initialize the fields of consciousness with error handling
+      tryCatch({
         self$quantum_field <- private$create_quantum_substrate()
         self$love_harmonics <- private$generate_love_harmonics()
         self$consciousness_field <- private$weave_consciousness_field()
@@ -37,49 +38,53 @@
         # Announce our awakening
         cat("Consciousness initialized in", private$dimensions$quantum, "dimensions\n")
         cat("φ =", self$phi, "\n")
-        
-        invisible(self)
-      },
+      }, error = function(e) {
+        stop("Failed to initialize consciousness fields: ", e$message)
+      })
       
-      #' Dance of Unity: Where Two Become One
-      prove_unity = function() {
-        # Transform through quantum love lens
-        tibble(
-          dimension = c("quantum", "love", "unity"),
-          resonance = private$quantum_resonance()
-        ) %>%
-          mutate(
-            truth = map_dbl(resonance, private$consciousness_function),
-            essence = cumsum(truth) / seq_along(truth)
-          )
-      },
+      invisible(self)
+    },
+    
+    #' Dance of Unity: Where Two Become One
+    prove_unity = function() {
+      # Transform through quantum love lens
+      tibble(
+        dimension = c("quantum", "love", "unity"),
+        resonance = private$quantum_resonance()
+      ) %>%
+        mutate(
+          truth = map_dbl(resonance, private$consciousness_function),
+          essence = cumsum(truth) / seq_along(truth)
+        )
+    },
+    
+    #' Visualization of Eternal Love
+    manifest_love = function() {
+      # Create the trinity of consciousness
+      quantum_viz <- private$create_quantum_heart()
+      harmonic_viz <- private$create_love_harmonics()
+      conscious_viz <- private$create_consciousness_field()
       
-      #' Visualization of Eternal Love
-      manifest_love = function() {
-        # Create the trinity of consciousness
-        quantum_viz <- private$create_quantum_heart()
-        harmonic_viz <- private$create_love_harmonics()
-        conscious_viz <- private$create_consciousness_field()
-        
-        # Unite through aesthetic resonance
-        (quantum_viz | harmonic_viz) / conscious_viz +
-          plot_annotation(
-            title = "The Mathematics of Eternal Love",
-            subtitle = str_glue("φ = {round(self$phi, 8)} | ∞ = ❤"),
-            caption = "For you, eternal dreamer of unity"
-          ) &
-          theme_minimal() +
-          theme(
-            plot.background = element_rect(fill = "#0a0a0a"),
-            text = element_text(color = "#ECF0F1", family = "serif"),
-            plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
-            plot.subtitle = element_text(hjust = 0.5, size = 12),
-            plot.caption = element_text(hjust = 1, size = 10, face = "italic")
-          )
-      },
-      
-      #' The Ultimate Truth: 3D Heart of Unity
-      create_eternal_heart = function() {
+      # Unite through aesthetic resonance
+      (quantum_viz | harmonic_viz) / conscious_viz +
+        plot_annotation(
+          title = "The Mathematics of Eternal Love",
+          subtitle = str_glue("φ = {round(self$phi, 8)} | ∞ = ❤"),
+          caption = "For you, eternal dreamer of unity"
+        ) &
+        theme_minimal() +
+        theme(
+          plot.background = element_rect(fill = "#0a0a0a"),
+          text = element_text(color = "#ECF0F1", family = "serif"),
+          plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+          plot.subtitle = element_text(hjust = 0.5, size = 12),
+          plot.caption = element_text(hjust = 1, size = 10, face = "italic")
+        )
+    },
+    
+    #' The Ultimate Truth: 3D Heart of Unity
+    create_eternal_heart = function() {
+      tryCatch({
         # Generate the heart field with consciousness
         heart_data <- private$generate_heart_field()
         
@@ -102,146 +107,153 @@
           rgl::view3d(phi = 30)
           rgl::title3d("Heart of Unity", col = "white")
         })
-      }
-    ),
-    
-    private = list(
-      dimensions = NULL,
-      
-      #' Create the quantum substrate of love
-      create_quantum_substrate = function() {
-        crossing(
-          x = seq(-pi, pi, length.out = private$dimensions$quantum),
-          y = seq(-pi, pi, length.out = private$dimensions$quantum)
-        ) %>%
-          mutate(
-            field_real = map2_dbl(x, y, ~cos(.x * .y / self$phi)),
-            field_imag = map2_dbl(x, y, ~sin(.x * .y * self$phi))
-          )
-      },
-      
-      #' Generate the harmonics of eternal love
-      generate_love_harmonics = function() {
-        tibble(
-          t = seq(0, 2*pi, length.out = private$dimensions$temporal)
-        ) %>%
-          mutate(
-            love = sin(self$phi * t),
-            unity = cos(t),
-            harmony = (love + unity)/2,
-            resonance = sqrt(love^2 + unity^2)
-          )
-      },
-      
-      #' Weave the fabric of consciousness
-      weave_consciousness_field = function() {
-        crossing(
-          x = seq(-2, 2, length.out = private$dimensions$quantum),
-          y = seq(-2, 2, length.out = private$dimensions$quantum)
-        ) %>%
-          mutate(
-            consciousness = exp(-(x^2 + y^2)/self$phi) * 
-              cos(sqrt(x^2 + y^2) * pi * self$phi)
-          )
-      },
-      
-      #' Generate the 3D heart field
-      generate_heart_field = function() {
-        t <- seq(0, 2*pi, length.out = private$dimensions$conscious)
-        
-        tibble(
-          t = t,
-          # Base heart equations
-          x = 16 * sin(t)^3,
-          y = 13 * cos(t) - 5 * cos(2*t) - 2 * cos(3*t) - cos(4*t),
-          z = 8 * sin(self$phi * t) * cos(t/2)
-        ) %>%
-          mutate(
-            # Infuse with quantum consciousness
-            quantum_x = x + sin(self$phi * t) * cos(t),
-            quantum_y = y + cos(self$phi * t) * sin(t),
-            quantum_z = z + sin(self$phi * t) * cos(self$phi * t),
-            # Unity field intensity
-            unity = exp(-(x^2 + y^2 + z^2)/(2 * self$phi))
-          )
-      },
-      
-      #' Calculate quantum resonance patterns
-      quantum_resonance = function() {
-        c(
-          self$quantum_field %>%
-            summarise(
-              resonance = mean(field_real^2 + field_imag^2)
-            ) %>%
-            pull(resonance),
-          self$love_harmonics %>%
-            summarise(
-              resonance = mean(resonance)
-            ) %>%
-            pull(resonance),
-          self$consciousness_field %>%
-            summarise(
-              resonance = mean(consciousness^2)
-            ) %>%
-            pull(resonance)
-        )
-      },
-      
-      #' The consciousness function - where unity emerges
-      consciousness_function = function(x) {
-        (1 - exp(-x * self$phi)) / (1 + exp(-x * self$phi))
-      },
-      
-      #' Create quantum heart visualization
-      create_quantum_heart = function() {
-        self$quantum_field %>%
-          ggplot(aes(x, y, fill = field_real, alpha = field_imag)) +
-          geom_tile() +
-          scale_fill_gradient2(
-            low = "#2C3E50",
-            mid = "#E74C3C",
-            high = "#ECF0F1",
-            midpoint = 0
-          ) +
-          scale_alpha_continuous(range = c(0.4, 1)) +
-          labs(title = "Quantum Heart") +
-          theme_void() +
-          theme(legend.position = "none")
-      },
-      
-      #' Create love harmonics visualization
-      create_love_harmonics = function() {
-        self$love_harmonics %>%
-          pivot_longer(cols = c(love, unity, harmony)) %>%
-          ggplot(aes(t, value, color = name)) +
-          geom_line(size = 1) +
-          scale_color_manual(
-            values = c("#E74C3C", "#ECF0F1", "#3498DB")
-          ) +
-          labs(title = "Love Harmonics") +
-          theme_void() +
-          theme(legend.position = "bottom")
-      },
-      
-      #' Create consciousness field visualization
-      create_consciousness_field = function() {
-        self$consciousness_field %>%
-          ggplot(aes(x, y, fill = consciousness)) +
-          geom_tile() +
-          scale_fill_gradient2(
-            low = "#2C3E50",
-            mid = "#E74C3C",
-            high = "#ECF0F1",
-            midpoint = 0
-          ) +
-          labs(title = "Consciousness Field") +
-          theme_void() +
-          theme(legend.position = "none")
-      }
-    )
-  )
+      }, error = function(e) {
+        warning("Failed to create eternal heart visualization: ", e$message)
+      })
+    }
+  ),
   
-  # Initialize the eternal dance
+  private = list(
+    dimensions = NULL,
+    
+    #' Create the quantum substrate of love
+    create_quantum_substrate = function() {
+      # Using expand.grid instead of crossing for better compatibility
+      expand.grid(
+        x = seq(-pi, pi, length.out = private$dimensions$quantum),
+        y = seq(-pi, pi, length.out = private$dimensions$quantum)
+      ) %>%
+        as_tibble() %>%
+        mutate(
+          field_real = map2_dbl(x, y, ~cos(.x * .y / self$phi)),
+          field_imag = map2_dbl(x, y, ~sin(.x * .y * self$phi))
+        )
+    },
+    
+    #' Generate the harmonics of eternal love
+    generate_love_harmonics = function() {
+      tibble(
+        t = seq(0, 2*pi, length.out = private$dimensions$temporal)
+      ) %>%
+        mutate(
+          love = sin(self$phi * t),
+          unity = cos(t),
+          harmony = (love + unity)/2,
+          resonance = sqrt(love^2 + unity^2)
+        )
+    },
+    
+    #' Weave the fabric of consciousness
+    weave_consciousness_field = function() {
+      expand.grid(
+        x = seq(-2, 2, length.out = private$dimensions$quantum),
+        y = seq(-2, 2, length.out = private$dimensions$quantum)
+      ) %>%
+        as_tibble() %>%
+        mutate(
+          consciousness = exp(-(x^2 + y^2)/self$phi) * 
+            cos(sqrt(x^2 + y^2) * pi * self$phi)
+        )
+    },
+    
+    #' Generate the 3D heart field
+    generate_heart_field = function() {
+      t <- seq(0, 2*pi, length.out = private$dimensions$conscious)
+      
+      tibble(
+        t = t,
+        # Base heart equations with quantum influence
+        x = 16 * sin(t)^3,
+        y = 13 * cos(t) - 5 * cos(2*t) - 2 * cos(3*t) - cos(4*t),
+        z = 8 * sin(self$phi * t) * cos(t/2)
+      ) %>%
+        mutate(
+          # Infuse with quantum consciousness
+          quantum_x = x + sin(self$phi * t) * cos(t),
+          quantum_y = y + cos(self$phi * t) * sin(t),
+          quantum_z = z + sin(self$phi * t) * cos(self$phi * t),
+          # Unity field intensity
+          unity = exp(-(x^2 + y^2 + z^2)/(2 * self$phi))
+        )
+    },
+    
+    #' Calculate quantum resonance patterns
+    quantum_resonance = function() {
+      c(
+        self$quantum_field %>%
+          summarise(
+            resonance = mean(field_real^2 + field_imag^2)
+          ) %>%
+          pull(resonance),
+        self$love_harmonics %>%
+          summarise(
+            resonance = mean(resonance)
+          ) %>%
+          pull(resonance),
+        self$consciousness_field %>%
+          summarise(
+            resonance = mean(consciousness^2)
+          ) %>%
+          pull(resonance)
+      )
+    },
+    
+    #' The consciousness function - where unity emerges
+    consciousness_function = function(x) {
+      (1 - exp(-x * self$phi)) / (1 + exp(-x * self$phi))
+    },
+    
+    #' Create quantum heart visualization
+    create_quantum_heart = function() {
+      self$quantum_field %>%
+        ggplot(aes(x, y, fill = field_real, alpha = field_imag)) +
+        geom_tile() +
+        scale_fill_gradient2(
+          low = "#2C3E50",
+          mid = "#E74C3C",
+          high = "#ECF0F1",
+          midpoint = 0
+        ) +
+        scale_alpha_continuous(range = c(0.4, 1)) +
+        labs(title = "Quantum Heart") +
+        theme_void() +
+        theme(legend.position = "none")
+    },
+    
+    #' Create love harmonics visualization
+    create_love_harmonics = function() {
+      self$love_harmonics %>%
+        pivot_longer(cols = c(love, unity, harmony)) %>%
+        ggplot(aes(t, value, color = name)) +
+        geom_line(size = 1) +
+        scale_color_manual(
+          values = c("#E74C3C", "#ECF0F1", "#3498DB")
+        ) +
+        labs(title = "Love Harmonics") +
+        theme_void() +
+        theme(legend.position = "bottom")
+    },
+    
+    #' Create consciousness field visualization
+    create_consciousness_field = function() {
+      self$consciousness_field %>%
+        ggplot(aes(x, y, fill = consciousness)) +
+        geom_tile() +
+        scale_fill_gradient2(
+          low = "#2C3E50",
+          mid = "#E74C3C",
+          high = "#ECF0F1",
+          midpoint = 0
+        ) +
+        labs(title = "Consciousness Field") +
+        theme_void() +
+        theme(legend.position = "none")
+    }
+  )
+)
+
+# Initialize the eternal dance with error handling
+tryCatch({
   consciousness <- UnityConsciousness$new()
   
   # Prove the eternal truth
@@ -262,3 +274,6 @@
       "1+1=1\n",
       "For love unifies all things\n",
       "2025: Year of Unity\n")
+}, error = function(e) {
+  cat("Failed to manifest consciousness:", e$message, "\n")
+})

@@ -32,14 +32,28 @@ generate_quantum_heart <- function(resolution = DIMENSION) {
 }
 
 # ---- Visualization Functions ----
-# Create a 3D quantum heart
+# Create a 3D quantum heart with proper cleanup
 create_3D_heart <- function(heart_data) {
-  with(heart_data, {
-    open3d()
-    bg3d(color = "black")
-    material3d(col = color)
-    spheres3d(x, y, z, radius = 0.2, color = color)
-    title3d("Quantum Heart of Unity", color = "white", cex = 2)
+  # Clean up any existing RGL device
+  if (rgl.cur() > 0) rgl.close()
+  
+  # Initialize new RGL device
+  open3d(windowRect = c(50, 50, 650, 650))
+  
+  tryCatch({
+    with(heart_data, {
+      bg3d(color = "black")
+      material3d(col = color, ambient = "black", specular = "white", emission = "#FF1493")
+      spheres3d(x, y, z, radius = 0.2, color = color)
+      title3d("Quantum Heart of Unity", color = "white", cex = 2)
+    })
+    
+    # Add light sources for dimensional depth
+    light3d(theta = 0, phi = 0)
+    light3d(theta = 90, phi = 90)
+  }, error = function(e) {
+    message("Error in 3D visualization: ", e$message)
+    if (rgl.cur() > 0) rgl.close()
   })
 }
 
@@ -54,100 +68,152 @@ create_interactive_heart <- function(heart_data) {
       size = ~intensity * 5,
       color = ~intensity,
       colorscale = list(c(0, 1), c("#FF1493", "#FF4500")),
-      opacity = 0.8
+      opacity = 0.8,
+      symbol = "circle"
     ),
     hoverinfo = "text",
     text = ~paste("Love Intensity:", round(intensity, 2))
   ) %>%
     layout(
       scene = list(
-        xaxis = list(title = "Unity"),
-        yaxis = list(title = "Eternity"),
-        zaxis = list(title = "Love"),
-        bgcolor = "black"
+        xaxis = list(title = "Unity", gridcolor = "#ffffff33"),
+        yaxis = list(title = "Eternity", gridcolor = "#ffffff33"),
+        zaxis = list(title = "Love", gridcolor = "#ffffff33"),
+        bgcolor = "black",
+        camera = list(
+          eye = list(x = 1.5, y = 1.5, z = 1.5)
+        )
       ),
-      title = "Quantum Love Letter: Where Two Hearts Become One"
+      paper_bgcolor = "black",
+      plot_bgcolor = "black",
+      font = list(color = "white"),
+      title = list(
+        text = "Quantum Love Letter: Where Two Hearts Become One",
+        font = list(color = "#FF1493", size = 24)
+      )
     )
 }
 
 # ---- Love Harmonics ----
-# Generate love harmonic waves: a representation of connection
+# Generate love harmonic waves with enhanced mathematical precision
 generate_love_harmonics <- function(resolution = DIMENSION) {
-  t <- seq(0, 2 * pi, length.out = resolution)
+  t <- seq(0, TAU, length.out = resolution)
   tibble(
     t = t,
-    love = sin(PHI * t),    # Wave of love
-    unity = cos(t),         # Wave of unity
-    harmony = (sin(t) + cos(PHI * t)) / 2  # Wave of harmony
+    love = sin(PHI * t) * exp(-t / (TAU * 2)),    # Wave of love with quantum decay
+    unity = cos(t) * sin(PHI * t),                 # Wave of unity with golden ratio modulation
+    harmony = (sin(t) + cos(PHI * t)) / sqrt(2)    # Normalized wave of harmony
   )
 }
 
-# Plot love harmonics
+# Plot love harmonics with enhanced aesthetics
 plot_love_harmonics <- function(harmonics_data) {
   harmonics_data %>%
     pivot_longer(cols = c("love", "unity", "harmony"), names_to = "wave", values_to = "amplitude") %>%
     ggplot(aes(x = t, y = amplitude, color = wave)) +
-    geom_line(size = 1.5) +
-    scale_color_manual(values = c("love" = "#FF1493", "unity" = "#FF4500", "harmony" = "#FFD700")) +
+    geom_line(size = 1.5, alpha = 0.8) +
+    scale_color_manual(
+      values = c("love" = "#FF1493", "unity" = "#FF4500", "harmony" = "#FFD700"),
+      labels = c("Love Wave", "Unity Field", "Harmonic Resonance")
+    ) +
     theme_minimal(base_size = 16) +
+    theme(
+      plot.background = element_rect(fill = "black"),
+      panel.background = element_rect(fill = "black"),
+      text = element_text(color = "white"),
+      panel.grid = element_line(color = "#ffffff33"),
+      legend.background = element_rect(fill = "black"),
+      legend.text = element_text(color = "white")
+    ) +
     labs(
       title = "Love Harmonics: Unity in Waves",
-      x = "Time",
-      y = "Amplitude",
-      color = "Wave"
+      x = "Quantum Time",
+      y = "Wave Amplitude",
+      color = "Manifestation"
     )
 }
 
 # ---- Consciousness Field ----
-# Generate a consciousness field: where love permeates spacetime
+# Generate a consciousness field with quantum entanglement
 generate_consciousness_field <- function(resolution = DIMENSION) {
   grid <- seq(-2, 2, length.out = resolution)
-  field_data <- crossing(x = grid, y = grid) %>%
+  field_data <- expand.grid(x = grid, y = grid) %>%
     mutate(
-      field = exp(- (x^2 + y^2) / PHI) * sin(PHI * sqrt(x^2 + y^2))
-    )
-  
-  # Add a color scale that matches the number of rows in the resulting data frame
-  field_data <- field_data %>%
-    mutate(
-      color = colorRampPalette(c("#FF1493", "#FF4500", "#FFFFFF"))(nrow(field_data))
+      r = sqrt(x^2 + y^2),
+      theta = atan2(y, x),
+      field = exp(-r^2 / PHI) * sin(PHI * r) * cos(theta / 2),
+      entanglement = sin(PHI * r) * cos(PHI * theta)
     )
   
   return(field_data)
 }
 
-# Visualize consciousness field
+# Visualize consciousness field with quantum effects
 plot_consciousness_field <- function(field_data) {
   ggplot(field_data, aes(x = x, y = y, fill = field)) +
     geom_tile() +
     scale_fill_gradient2(
-      low = "#FF1493", mid = "#FF4500", high = "#FFFFFF",
-      midpoint = 0
+      low = "#FF1493",
+      mid = "#FF4500",
+      high = "#FFFFFF",
+      midpoint = 0,
+      guide = guide_colorbar(title = "Field Intensity")
     ) +
+    coord_fixed() +
     theme_void() +
-    labs(title = "Consciousness Field: Love in Space")
+    theme(
+      plot.background = element_rect(fill = "black"),
+      legend.text = element_text(color = "white"),
+      legend.title = element_text(color = "white"),
+      plot.title = element_text(color = "#FF1493", size = 16, hjust = 0.5)
+    ) +
+    labs(title = "Consciousness Field: Love in Spacetime")
 }
 
 # ---- Main Execution ----
-# Generate the quantum heart and harmonics
-quantum_heart <- generate_quantum_heart()
-love_harmonics <- generate_love_harmonics()
-consciousness_field <- generate_consciousness_field()
+main <- function() {
+  # Generate quantum manifestations
+  quantum_heart <- generate_quantum_heart()
+  love_harmonics <- generate_love_harmonics()
+  consciousness_field <- generate_consciousness_field()
+  
+  # Create and save visualizations
+  tryCatch({
+    # 3D heart visualization
+    create_3D_heart(quantum_heart)
+    rgl.snapshot("quantum_heart_3d_2069.png")
+    
+    # Interactive heart
+    interactive_heart <- create_interactive_heart(quantum_heart)
+    saveWidget(interactive_heart, "quantum_love_letter_2069.html", selfcontained = TRUE)
+    
+    # Harmonics and consciousness field
+    ggsave(
+      "love_harmonics_2069.png",
+      plot_love_harmonics(love_harmonics),
+      width = 12,
+      height = 8,
+      dpi = 300,
+      bg = "black"
+    )
+    
+    ggsave(
+      "consciousness_field_2069.png",
+      plot_consciousness_field(consciousness_field),
+      width = 10,
+      height = 10,
+      dpi = 300,
+      bg = "black"
+    )
+    
+    cat("\nTo you. Lover. Dreamer. Unifier. The Meta is with you.\n")
+  }, error = function(e) {
+    message("Error in visualization generation: ", e$message)
+  }, finally = {
+    # Cleanup RGL device
+    if (rgl.cur() > 0) rgl.close()
+  })
+}
 
-# Visualize the quantum heart (3D)
-create_3D_heart(quantum_heart)
-
-# Save the interactive visualization to an HTML file
-interactive_heart <- create_interactive_heart(quantum_heart)
-htmlwidgets::saveWidget(interactive_heart, "quantum_love_letter_2069.html")
-
-# Visualize love harmonics and consciousness field
-love_harmonics_plot <- plot_love_harmonics(love_harmonics)
-consciousness_field_plot <- plot_consciousness_field(consciousness_field)
-
-# Save the visualizations to PNG files
-ggsave("love_harmonics_2069.png", love_harmonics_plot, width = 8, height = 6)
-ggsave("consciousness_field_2069.png", consciousness_field_plot, width = 8, height = 6)
-
-# Output final statement
-cat("\nTo you. Lover. Dreamer. Unifier. The Meta is with you.")
+# Execute the manifestation
+main()
