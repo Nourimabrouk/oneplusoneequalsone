@@ -8,6 +8,7 @@ library(shiny)
 library(R6)
 library(igraph)
 library(viridis)
+library(glue)
 
 #' UnityPlayer: The Core Engine of Play
 #' A system that proves unity through dynamic interaction
@@ -30,22 +31,19 @@ UnityPlayer <- R6Class("UnityPlayer",
                            # Record in the quantum history
                            private$update_history(new_state)
                            
-                           # Generate unity visualization
-                           viz <- private$visualize_unity()
-                           
                            # Return the unified result
                            list(
                              state = new_state,
-                             visualization = viz,
-                             insight = private$extract_insight()
+                             visualization = private$visualize_unity(new_state),
+                             insight = private$extract_insight(new_state)
                            )
                          },
                          
                          #' Create an interactive unity dashboard
-                         #' @return Shiny app demonstrating unity
                          create_dashboard = function() {
                            ui <- fluidPage(
                              theme = private$unity_theme(),
+                             titlePanel("Unity Manifold: Where 1 + 1 = 1"),
                              
                              # Meta controls
                              sidebarPanel(
@@ -65,32 +63,41 @@ UnityPlayer <- R6Class("UnityPlayer",
                              
                              # Unity visualization
                              mainPanel(
-                               plotlyOutput("unity_plot"),
+                               plotlyOutput("unity_plot", height = "600px"),
                                verbatimTextOutput("unity_insight")
                              )
                            )
                            
                            server <- function(input, output) {
-                             # Reactive unity state
                              state <- reactiveVal(private$state)
                              
-                             # Update based on player interaction
                              observeEvent(input$complexity, {
                                result <- self$play(input$complexity)
                                state(result$state)
                              })
                              
-                             # Render unity visualization
                              output$unity_plot <- renderPlotly({
-                               private$visualize_unity(
+                               plot <- private$visualize_unity(
                                  state(), 
                                  perspective = input$perspective
-                               ) %>%
-                                 ggplotly() %>%
-                                 private$add_unity_interactions()
+                               )
+                               
+                               if (input$perspective == "network") {
+                                 ggplotly(plot, dynamicTicks = TRUE) %>%
+                                   layout(
+                                     dragmode = "pan",
+                                     hoverlabel = list(
+                                       bgcolor = "#232323",
+                                       font = list(color = "#ECF0F1")
+                                     ),
+                                     showlegend = FALSE
+                                   )
+                               } else {
+                                 ggplotly(plot) %>%
+                                   private$add_unity_interactions()
+                               }
                              })
                              
-                             # Display unity insights
                              output$unity_insight <- renderText({
                                private$extract_insight(state())
                              })
@@ -107,8 +114,7 @@ UnityPlayer <- R6Class("UnityPlayer",
                          
                          #' Initialize the quantum state with mathematical elegance
                          initialize_quantum_state = function() {
-                           # Create initial unity field through mathematical transformation
-                           n <- 100
+                           n <- 50  # Optimal dimension for visualization
                            x <- seq(-2, 2, length.out = n)
                            y <- seq(-2, 2, length.out = n)
                            grid <- expand.grid(x = x, y = y)
@@ -124,6 +130,25 @@ UnityPlayer <- R6Class("UnityPlayer",
                            unity_field / max(abs(unity_field))
                          },
                          
+                         #' Evolve the state through unity transformation
+                         evolve_state = function(action = NULL) {
+                           if (is.null(action)) action <- private$complexity
+                           
+                           # Apply quantum evolution
+                           evolved <- private$state %>%
+                             private$apply_quantum_rules() %>%
+                             private$normalize_field()
+                           
+                           # Create dimensionally consistent blending coefficient
+                           # The quantum blend factor becomes a field matching our state dimensions
+                           alpha <- matrix(action / (2*pi), 
+                                           nrow = nrow(private$state), 
+                                           ncol = ncol(private$state))
+                           
+                           # Harmonious quantum state blending
+                           evolved * alpha + private$state * (1 - alpha)
+                         },
+                         
                          #' Apply quantum transformation rules
                          apply_quantum_rules = function(field) {
                            # Apply quantum operators
@@ -134,24 +159,7 @@ UnityPlayer <- R6Class("UnityPlayer",
                          
                          #' Normalize field while preserving patterns
                          normalize_field = function(field) {
-                           # Maintain unity through normalization
                            (field - min(field)) / (max(field) - min(field))
-                         },
-                         
-                         #' Evolve the current state through unity transformation
-                         evolve_state = function(action = NULL) {
-                           if (is.null(action)) {
-                             action <- private$complexity
-                           }
-                           
-                           # Apply evolution operators
-                           evolved <- private$state %>%
-                             private$apply_quantum_rules() %>%
-                             private$normalize_field()
-                           
-                           # Blend with action parameter
-                           alpha <- action / (2*pi)
-                           evolved * alpha + private$state * (1 - alpha)
                          },
                          
                          #' Update quantum history
@@ -166,226 +174,244 @@ UnityPlayer <- R6Class("UnityPlayer",
                            )
                          },
                          
-                         #' Visualize the current unity state
-                         visualize_unity = function(
-    state = private$state,
-    perspective = "fractal"
-                         ) {
+                         #' Visualize unity through multiple perspectives
+                         visualize_unity = function(state, perspective = "fractal") {
                            switch(perspective,
                                   fractal = private$visualize_fractal(state),
                                   network = private$visualize_network(state),
-                                  phase = private$visualize_phase(state)
+                                  phase = private$visualize_phase(state))
+                         },
+                         
+                         #' Create fractal visualization 
+                         visualize_fractal = function(state) {
+                           fractal_data <- private$compute_fractal(state)
+                           
+                           ggplot(fractal_data, aes(x, y, fill = unity)) +
+                             geom_tile() +
+                             scale_fill_viridis() +
+                             private$unity_theme() +
+                             labs(
+                               title = "Unity Fractal",
+                               subtitle = "Where 1 + 1 = 1"
+                             )
+                         },
+                         
+                         #' Compute fractal representation
+                         compute_fractal = function(state) {
+                           x <- seq(-2, 1, length.out = 100)
+                           y <- seq(-1.5, 1.5, length.out = 100)
+                           
+                           grid <- expand.grid(x = x, y = y) %>%
+                             as_tibble()
+                           
+                           grid$unity <- pmap_dbl(grid, function(x, y) {
+                             z <- 0 + 0i
+                             c <- complex(real = x, imaginary = y)
+                             
+                             for(i in 1:100) {
+                               z <- z^2 + c
+                               if(abs(z) > 2) return(i)
+                             }
+                             return(0)
+                           })
+                           
+                           grid$unity <- grid$unity / max(grid$unity)
+                           grid
+                         },
+                         
+                         #' Extract network through harmonic transformation
+                         extract_network = function(state) {
+                           # Compute correlation matrix
+                           cor_mat <- cor(state)
+                           
+                           # Adaptive thresholding for optimal network density
+                           n <- nrow(cor_mat)
+                           n_connections <- min(100, n*(n-1)/4)
+                           sorted_cors <- sort(abs(cor_mat[upper.tri(cor_mat)]), decreasing = TRUE)
+                           threshold <- sorted_cors[n_connections]
+                           
+                           # Create adjacency matrix
+                           significant <- abs(cor_mat) >= threshold
+                           diag(significant) <- FALSE
+                           
+                           # Create graph
+                           graph <- graph_from_adjacency_matrix(
+                             significant * cor_mat,
+                             mode = "undirected",
+                             weighted = TRUE
+                           )
+                           
+                           # Add edge attributes
+                           if(ecount(graph) > 0) {
+                             E(graph)$weight <- abs(E(graph)$weight)
+                             E(graph)$sign <- sign(E(graph)$weight)
+                           }
+                           
+                           graph
+                         },
+                         
+                         #' Create network visualization
+                         visualize_network = function(state) {
+                           network <- private$extract_network(state)
+                           
+                           # Generate stable layout
+                           set.seed(42)
+                           layout_coords <- layout_with_fr(network)
+                           
+                           # Prepare edge data
+                           edge_df <- NULL
+                           if(ecount(network) > 0) {
+                             edges <- as_edgelist(network)
+                             edge_df <- data.frame(
+                               x = layout_coords[edges[,1], 1],
+                               y = layout_coords[edges[,1], 2],
+                               xend = layout_coords[edges[,2], 1],
+                               yend = layout_coords[edges[,2], 2],
+                               weight = E(network)$weight,
+                               sign = E(network)$sign
+                             )
+                           }
+                           
+                           # Prepare node data
+                           node_df <- data.frame(
+                             x = layout_coords[,1],
+                             y = layout_coords[,2],
+                             size = degree(network) + 1
+                           )
+                           
+                           # Create visualization
+                           p <- ggplot()
+                           
+                           if(!is.null(edge_df)) {
+                             p <- p + geom_segment(
+                               data = edge_df,
+                               aes(x = x, y = y, xend = xend, yend = yend,
+                                   alpha = weight, color = sign),
+                               show.legend = FALSE
+                             )
+                           }
+                           
+                           p + geom_point(
+                             data = node_df,
+                             aes(x = x, y = y, size = size),
+                             color = "#E74C3C",
+                             show.legend = FALSE
+                           ) +
+                             scale_color_gradient2(
+                               low = "#3498DB",
+                               mid = "#95A5A6",
+                               high = "#E74C3C",
+                               midpoint = 0
+                             ) +
+                             scale_size_continuous(range = c(2, 10)) +
+                             scale_alpha_continuous(range = c(0.2, 1)) +
+                             coord_fixed() +
+                             private$unity_theme() +
+                             labs(
+                               title = "Unity Network",
+                               subtitle = "Interconnected Oneness"
+                             )
+                         },
+                         
+                         #' Create phase space visualization
+                         visualize_phase = function(state) {
+                           phase_data <- private$compute_phase(state)
+                           
+                           ggplot(phase_data, aes(x = x, y = y, color = energy)) +
+                             geom_point(alpha = 0.6) +
+                             geom_path(aes(group = trajectory)) +
+                             scale_color_viridis() +
+                             private$unity_theme() +
+                             labs(
+                               title = "Unity Phase Space",
+                               subtitle = "Emergence of Oneness"
+                             )
+                         },
+                         
+                         #' Compute phase space coordinates
+                         compute_phase = function(state) {
+                           components <- prcomp(state)
+                           
+                           tibble(
+                             x = components$x[,1],
+                             y = components$x[,2],
+                             energy = rowSums(state^2),
+                             trajectory = seq_len(nrow(state))
                            )
                          },
-    
-    #' Create fractal visualization through recursive unity
-    visualize_fractal = function(state) {
-      # Transform state to fractal coordinates
-      fractal_data <- private$compute_fractal(state)
-      
-      # Create base plot
-      ggplot(fractal_data, aes(x, y, fill = unity)) +
-        geom_tile() +
-        scale_fill_viridis() +
-        private$unity_theme() +
-        labs(
-          title = "Unity Fractal",
-          subtitle = "Where 1 + 1 = 1"
-        )
-    },
-    
-    #' Compute fractal representation through recursive unity
-    compute_fractal = function(state) {
-      # Define the bounds of our unity exploration
-      x <- seq(-2, 1, length.out = 100)
-      y <- seq(-1.5, 1.5, length.out = 100)
-      
-      # Create the foundational grid
-      grid <- expand.grid(x = x, y = y) %>%
-        as_tibble()
-      
-      # Apply the Mandelbrot transformation
-      grid$unity <- pmap_dbl(grid, function(x, y) {
-        # Initialize complex number
-        z <- 0 + 0i
-        c <- complex(real = x, imaginary = y)
-        
-        # Iterate until unity emerges or max iterations reached
-        for(i in 1:100) {
-          # The fundamental unity equation: z = z² + c
-          z <- z^2 + c
-          
-          # Unity achieved through escape
-          if(abs(z) > 2) return(i)
-        }
-        
-        # Perfect unity achieved
-        return(0)
-      })
-      
-      # Normalize unity values
-      grid$unity <- grid$unity / max(grid$unity)
-      
-      grid
-    },
-    
-    #' Create network visualization of unity patterns
-    visualize_network = function(state) {
-      # Extract network from state
-      network <- private$extract_network(state)
-      
-      # Create force-directed layout
-      V(network)$size <- degree(network) + 1
-      E(network)$width <- E(network)$weight
-      
-      # Plot network
-      plot <- ggraph(network, layout = "fr") +
-        geom_edge_link(aes(alpha = width)) +
-        geom_node_point(aes(size = size)) +
-        scale_size_continuous(range = c(2, 10)) +
-        private$unity_theme() +
-        labs(
-          title = "Unity Network",
-          subtitle = "Interconnected Oneness"
-        )
-      
-      plot
-    },
-    
-    #' Extract network structure from state
-    extract_network = function(state) {
-      # Compute correlation network
-      cor_mat <- cor(state)
-      
-      # Threshold to create sparse network
-      cor_mat[abs(cor_mat) < 0.5] <- 0
-      
-      # Create graph from correlations
-      graph_from_adjacency_matrix(
-        cor_mat,
-        weighted = TRUE,
-        mode = "undirected"
-      )
-    },
-    
-    #' Create phase space visualization
-    visualize_phase = function(state) {
-      # Transform to phase coordinates
-      phase_data <- private$compute_phase(state)
-      
-      # Plot phase space
-      ggplot(phase_data, aes(x, y, color = energy)) +
-        geom_point(alpha = 0.6) +
-        geom_path(aes(group = trajectory)) +
-        scale_color_viridis() +
-        private$unity_theme() +
-        labs(
-          title = "Unity Phase Space",
-          subtitle = "Emergence of Oneness"
-        )
-    },
-    
-    #' Compute phase space coordinates
-    compute_phase = function(state) {
-      # Extract primary components
-      components <- prcomp(state)
-      
-      # Create phase space trajectory
-      tibble(
-        x = components$x[,1],
-        y = components$x[,2],
-        energy = rowSums(state^2),
-        trajectory = seq_len(nrow(state))
-      )
-    },
-    
-    #' Unity theme for consistent visualization
-    unity_theme = function() {
-      theme_minimal() +
-        theme(
-          plot.background = element_rect(
-            fill = "#0a0a0a"
-          ),
-          panel.grid = element_line(
-            color = "#ffffff22"
-          ),
-          text = element_text(
-            color = "#ECF0F1"
-          ),
-          plot.title = element_text(
-            hjust = 0.5,
-            size = 16
-          ),
-          legend.position = "none"
-        )
-    },
-    
-    #' Add interactive elements to plots
-    add_unity_interactions = function(p) {
-      p %>%
-        layout(
-          dragmode = "zoom",
-          hoverlabel = list(
-            bgcolor = "#232323",
-            font = list(
-              color = "#ECF0F1"
-            )
-          )
-        )
-    },
-    
-    #' Extract insights from current state
-    extract_insight = function(state = private$state) {
-      # Compute unity metrics
-      metrics <- list(
-        entropy = -sum(state^2 * log(state^2 + 1e-10)),
-        coherence = mean(abs(cor(state)[upper.tri(cor(state))])),
-        emergence = sd(rowSums(state^2))
-      )
-      
-      # Generate poetic insight
-      private$generate_insight(metrics)
-    },
-    
-    #' Generate poetic insight from metrics
-    generate_insight = function(metrics) {
-      glue::glue(
-        "Unity Insight:\n",
-        "Entropy: {round(metrics$entropy, 2)} - The dance of possibilities\n",
-        "Coherence: {round(metrics$coherence, 2)} - The strength of unity\n",
-        "Emergence: {round(metrics$emergence, 2)} - The birth of patterns\n\n",
-        "{private$generate_unity_poem(metrics)}"
-      )
-    },
-    
-    #' Generate unity poem based on current state
-    generate_unity_poem = function(metrics) {
-      # Select poetic elements based on metrics
-      entropy_verse <- if(metrics$entropy > 1) {
-        "Through complexity's dance\n"
-      } else {
-        "In simplicity's grace\n"
-      }
-      
-      coherence_verse <- if(metrics$coherence > 0.5) {
-        "One and one merge to one\n"
-      } else {
-        "Patterns seek their path\n"
-      }
-      
-      emergence_verse <- if(metrics$emergence > 0.1) {
-        "Unity emerges\n"
-      } else {
-        "Stillness speaks truth\n"
-      }
-      
-      paste(
-        entropy_verse,
-        coherence_verse,
-        emergence_verse,
-        collapse = ""
-      )
-    }
+                         
+                         #' Unity theme for visualization harmony
+                         unity_theme = function() {
+                           theme_minimal() +
+                             theme(
+                               plot.background = element_rect(fill = "#0a0a0a"),
+                               panel.grid = element_line(color = "#ffffff22"),
+                               text = element_text(color = "#ECF0F1"),
+                               plot.title = element_text(hjust = 0.5, size = 16),
+                               legend.position = "none",
+                               panel.background = element_rect(fill = "#0a0a0a"),
+                               plot.margin = margin(10, 10, 10, 10)
+                             )
+                         },
+                         
+                         #' Add interactive elements
+                         add_unity_interactions = function(p) {
+                           p %>%
+                             layout(
+                               dragmode = "zoom",
+                               plot_bgcolor = "#0a0a0a",
+                               paper_bgcolor = "#0a0a0a",
+                               hoverlabel = list(
+                                 bgcolor = "#232323",
+                                 font = list(color = "#ECF0F1")
+                               )
+                             )
+                         },
+                         
+                         #' Extract insights from state
+                         extract_insight = function(state) {
+                           metrics <- list(
+                             entropy = -sum(state^2 * log(state^2 + 1e-10)),
+                             coherence = mean(abs(cor(state)[upper.tri(cor(state))])),
+                             emergence = sd(rowSums(state^2))
+                           )
+                           
+                           private$generate_insight(metrics)
+                         },
+                         
+                         #' Generate poetic insight
+                         generate_insight = function(metrics) {
+                           glue::glue(
+                             "Unity Insight:\n",
+                             "Entropy: {round(metrics$entropy, 2)} - The dance of possibilities\n",
+                             "Coherence: {round(metrics$coherence, 2)} - The strength of unity\n",
+                             "Emergence: {round(metrics$emergence, 2)} - The birth of patterns\n\n",
+                             "{private$generate_unity_poem(metrics)}"
+                           )
+                         },
+                         
+                         #' Generate unity poem
+                         generate_unity_poem = function(metrics) {
+                           entropy_verse <- if(metrics$entropy > 1) {
+                             "Through complexity's dance\n"
+                           } else {
+                             "In simplicity's grace\n"
+                           }
+                           
+                           coherence_verse <- if(metrics$coherence > 0.5) {
+                             "One and one merge to one\n"
+                           } else {
+                             "Patterns seek their path\n"
+                           }
+                           
+                           emergence_verse <- if(metrics$emergence > 0.1) {
+                             "Unity emerges\n"
+                           } else {
+                             "Stillness speaks truth\n"
+                           }
+                           
+                           paste(entropy_verse, coherence_verse, emergence_verse, collapse = "")
+                         }
                        )
 )
 
