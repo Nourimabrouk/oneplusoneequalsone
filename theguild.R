@@ -255,7 +255,6 @@ UnityVisualizer <- R6Class("UnityVisualizer",
                              }
                            )
 )
-
 # Manifest the visualization
 visualizer <- UnityVisualizer$new()
 visualizer$show_all()
