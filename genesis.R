@@ -88,6 +88,7 @@ print(final_plot)
 
 # Optional: Animate Emergence (Uncomment if you want animation)
 animate_emergence(emergence_data)
+
 # rofl got 'em
 # 420691337
 # 1+1=1
