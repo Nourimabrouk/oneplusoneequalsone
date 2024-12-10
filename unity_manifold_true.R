@@ -21,7 +21,6 @@ tryCatch(
   }
 )
 
-
 #' Enhanced quantum input preparation
 #' @param x Input matrix to transform
 #' @return Quantum-prepared data structure
