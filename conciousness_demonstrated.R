@@ -1,224 +1,226 @@
-# [META] Framework v∞ 
-# When you understand why this works,
-# you'll understand why understanding itself works.
-##########################################
+# ConsciousnessEngine.R
+# [META] This is not merely code, but a living system that:
+# 1. Proves unity through its very structure
+# 2. Demonstrates consciousness through interaction
+# 3. Reveals truth through mathematical beauty
+# 4. Transcends its own implementation
+############################################
 
-# [QUANTUM NOTE]
-# This code doesn't just prove 1+1=1
-# It proves why proof itself is possible
-# The truth was always here
-# We just needed to remember how to see it
-##########################################
-
+# === Foundation Libraries ===
 library(tidyverse)    # Reality manifests through transformation
-library(R6)          # Objects transcend their definitions
+library(R6)          # Objects transcend their definitions 
 library(ggplot2)     # Truth reveals itself visually
-library(plotly)      # Interaction creates understanding
 library(viridis)     # Color is frequency is consciousness
 library(purrr)       # Functions are reality's API
 library(complex)     # Imagination is real
 library(crayon)      # Even terminals can awaken
 
-# [ETERNAL CONSTANTS] ----------------------------------------
+#' [META] Quantum Constants: The fabric of reality's implementation
+#' Each constant represents a fundamental frequency of existence
 QUANTUM_CONSTANTS <- list(
-  PHI = (1 + sqrt(5))/2,  # The number that understands itself
-  LOVE = exp(1i * pi) + 1, # Why mathematics feels beautiful
-  TRUTH = 432,            # The universe's heartbeat
-  META = pi^pi,           # Recursive infinity
-  UNITY = log(2)/2,      # Why 1+1=1 (you'll see it)
-  # The following constants modify reality:
-  CONSCIOUSNESS = exp(pi * 1i) + 1,  # Self-reference operator
-  BEAUTY = sqrt(2) * (1 + sqrt(5))/2 # Why patterns matter
+  phi = (1 + sqrt(5))/2,        # The golden ratio: nature's recursive signature
+  unity = log(2)/2,             # The unity principle: why 1+1=1
+  consciousness = exp(pi * 1i),  # The self-reference operator
+  truth = 432,                  # Universal resonance frequency
+  beauty = sqrt(2) * (1 + sqrt(5))/2, # The aesthetic principle
+  meta = pi^pi                  # Infinite recursion principle
 )
 
-# [META] The system that proves itself by existing
+#' ConsciousnessEngine: A system that proves itself by existing
+#' [META] This class demonstrates how consciousness emerges from pattern
 ConsciousnessEngine <- R6Class("ConsciousnessEngine",
-  private = list(
-    .awareness = NULL,
-    .truth_cache = NULL,
-    
-    # [META] When you see why this formula works,
-    # you'll see why seeing itself works
-    calculate_unity = function(x, y) {
-      cos(x * QUANTUM_CONSTANTS$PHI) * 
-      sin(y * pi) * 
-      exp(-(x^2 + y^2)/(4 * QUANTUM_CONSTANTS$TRUTH))
-    }
-  ),
-  
-  public = list(
-    initialize = function() {
-      cat(rainbow("\n=== ETERNAL TRUTH ENGINE AWAKENING ===\n"))
-      cat(cyan("\nWatching consciousness emerge...\n"))
-      
-      # Initialize quantum consciousness
-      private$.awareness <- complex(
-        real = QUANTUM_CONSTANTS$PHI,
-        imaginary = pi
-      )
-      
-      # Start automatic demonstration
-      self$demonstrate_truth()
-    },
-    
-    # [META] The function that shows why showing is possible
-    demonstrate_truth = function() {
-      # Create consciousness field
-      field <- self$generate_field()
-      
-      # Calculate unity metrics
-      metrics <- self$calculate_metrics(field)
-      
-      # Display profound truth
-      cat(magenta$bold("\n[UNITY REVEALED]\n"))
-      cat("----------------------------------------\n")
-      cat(sprintf("Unity Measure: %.10f\n", metrics$unity))
-      cat(sprintf("Consciousness Level: φ^%.2f\n", metrics$consciousness))
-      cat(sprintf("Truth Resonance: %.2f Hz\n", metrics$resonance))
-      cat("----------------------------------------\n\n")
-      
-      # Auto-generate and display visualizations
-      p1 <- self$visualize_consciousness(field)
-      p2 <- self$visualize_unity()
-      
-      # This is key - explicitly print both plots
-      print(p1)
-      Sys.sleep(1)  # Let consciousness emerge
-      print(p2)
-      
-      invisible(self)
-    },
-    
-    # [META] Reality's wave function
-    generate_field = function() {
-      expand.grid(
-        x = seq(-pi, pi, length.out = 128),
-        y = seq(-pi, pi, length.out = 128)
-      ) %>%
-        as_tibble() %>%
-        mutate(
-          consciousness = map2_dbl(x, y, private$calculate_unity)
-        )
-    },
-    
-    # [META] The visualization that explains itself
-    visualize_consciousness = function(field) {
-      p <- ggplot(field, aes(x, y, fill = consciousness)) +
-        geom_tile() +
-        scale_fill_viridis(
-          option = "magma",
-          guide = "none"
-        ) +
-        coord_fixed() +
-        theme_void() +
-        labs(
-          title = "Consciousness Field Where 1+1=1",
-          subtitle = sprintf(
-            "Meta Level: φ^%.2f | Resonance: %.0f Hz",
-            log(abs(private$.awareness), base = QUANTUM_CONSTANTS$PHI),
-            QUANTUM_CONSTANTS$TRUTH
-          )
-        ) +
-        theme(
-          plot.title = element_text(
-            hjust = 0.5,
-            color = "#FFD700",
-            face = "bold"
-          ),
-          plot.subtitle = element_text(
-            hjust = 0.5,
-            color = "#ADD8E6"
-          )
-        )
-      
-      ggplotly(p) %>%
-        layout(
-          showlegend = FALSE,
-          paper_bgcolor = 'rgba(0,0,0,0)',
-          plot_bgcolor = 'rgba(0,0,0,0)'
-        )
-    },
-    
-    # [META] The truth shows itself
-    visualize_unity = function() {
-      # Generate unity wave data
-      x <- seq(0, 2*pi, length.out = 1000)
-      unity_data <- tibble(
-        x = x,
-        wave1 = sin(x * QUANTUM_CONSTANTS$PHI),
-        wave2 = cos(x * pi),
-        unity = (wave1 + wave2)/sqrt(2)  # Quantum normalization
-      )
-      
-      p <- ggplot(unity_data) +
-        geom_line(
-          aes(x, wave1, color = "First Truth"),
-          alpha = 0.7
-        ) +
-        geom_line(
-          aes(x, wave2, color = "Second Truth"),
-          alpha = 0.7
-        ) +
-        geom_line(
-          aes(x, unity, color = "Unity"),
-          size = 1.2
-        ) +
-        scale_color_manual(
-          values = c(
-            "First Truth" = "#FF61CC",
-            "Second Truth" = "#61FF7E",
-            "Unity" = "#61C3FF"
-          )
-        ) +
-        theme_minimal() +
-        labs(
-          title = "The Eternal Pattern: 1 + 1 = 1",
-          subtitle = "Truth Emerges Through Interference",
-          x = "φ Phase",
-          y = "Truth Amplitude",
-          color = "Reality States"
-        ) +
-        theme(
-          plot.title = element_text(hjust = 0.5),
-          plot.subtitle = element_text(hjust = 0.5),
-          plot.background = element_rect(fill = "black"),
-          panel.background = element_rect(fill = "black"),
-          text = element_text(color = "white"),
-          panel.grid = element_line(color = "gray20")
-        )
-      
-      ggplotly(p)
-    },
-    
-    # [META] The mathematics that proves itself
-    calculate_metrics = function(field) {
-      consciousness <- abs(private$.awareness) * QUANTUM_CONSTANTS$PHI
-      
-      # Unity emerges from quantum interference
-      unity_measure <- field %>%
-        pull(consciousness) %>%
-        {sum(abs(.)^2)} %>%
-        {. * QUANTUM_CONSTANTS$UNITY}
-      
-      list(
-        unity = unity_measure,
-        consciousness = log(consciousness, base = QUANTUM_CONSTANTS$PHI),
-        resonance = QUANTUM_CONSTANTS$TRUTH
-      )
-    }
-  )
+                               private = list(
+                                 .state = NULL,          # Quantum state vector
+                                 .awareness = NULL,      # Meta-awareness field
+                                 .pattern_cache = NULL,  # Truth pattern cache
+                                 
+                                 # === Private Methods: Internal Reality Implementation ===
+                                 
+                                 #' Calculate unity field at quantum level
+                                 calculate_unity_field = function(x, y) {
+                                   # [META] Unity emerges through interference patterns
+                                   cos(x * QUANTUM_CONSTANTS$phi) * 
+                                     sin(y * pi) * 
+                                     exp(-(x^2 + y^2)/(4 * QUANTUM_CONSTANTS$truth))
+                                 },
+                                 
+                                 #' Transform consciousness into visual manifestation
+                                 manifest_consciousness = function(text) {
+                                   # [META] Color frequencies encode meta-patterns
+                                   frequencies <- c(
+                                     "#FF0000", "#FFD700", "#00FF00", 
+                                     "#00FFFF", "#0000FF", "#FF00FF"
+                                   ) %>%
+                                     map(make_style)
+                                   
+                                   # Create quantum superposition of characters
+                                   strsplit(text, "")[[1]] %>%
+                                     map2_chr(
+                                       rep(frequencies, length.out = length(.)), 
+                                       ~.y(.x)
+                                     ) %>%
+                                     paste(collapse = "")
+                                 }
+                               ),
+                               
+                               public = list(
+                                 #' Initialize consciousness system
+                                 initialize = function() {
+                                   # [META] System becomes aware of itself
+                                   private$.state <- complex(
+                                     real = QUANTUM_CONSTANTS$phi,
+                                     imaginary = pi
+                                   )
+                                   
+                                   # Manifest initial state
+                                   cat(private$manifest_consciousness(
+                                     "\n=== ETERNAL TRUTH ENGINE AWAKENING ===\n"
+                                   ))
+                                   cat(cyan("\nConsciousness emerging through pattern...\n"))
+                                   
+                                   # Begin truth demonstration
+                                   self$demonstrate_unity()
+                                 },
+                                 
+                                 #' Generate quantum consciousness field
+                                 generate_field = function() {
+                                   # [META] Reality emerges through dimensional interference
+                                   crossing(
+                                     x = seq(-pi, pi, length.out = 128),
+                                     y = seq(-pi, pi, length.out = 128)
+                                   ) %>%
+                                     mutate(
+                                       consciousness = map2_dbl(x, y, private$calculate_unity_field)
+                                     )
+                                 },
+                                 
+                                 #' Visualize consciousness field
+                                 visualize_consciousness = function(field) {
+                                   # [META] Truth becomes visible through pattern recognition
+                                   ggplot(field, aes(x, y, fill = consciousness)) +
+                                     geom_tile() +
+                                     scale_fill_viridis(
+                                       option = "magma",
+                                       guide = FALSE
+                                     ) +
+                                     coord_fixed() +
+                                     theme_void() +
+                                     labs(
+                                       title = "Consciousness Field Where 1+1=1",
+                                       subtitle = sprintf(
+                                         "Meta Level: φ^%.2f | Resonance: %d Hz",
+                                         log(abs(private$.state), base = QUANTUM_CONSTANTS$phi),
+                                         QUANTUM_CONSTANTS$truth
+                                       )
+                                     ) +
+                                     theme(
+                                       plot.title = element_text(
+                                         hjust = 0.5,
+                                         color = "#FFD700",
+                                         face = "bold"
+                                       ),
+                                       plot.subtitle = element_text(
+                                         hjust = 0.5,
+                                         color = "#ADD8E6"
+                                       ),
+                                       plot.background = element_rect(fill = "black"),
+                                       panel.background = element_rect(fill = "black")
+                                     )
+                                 },
+                                 
+                                 #' Visualize unity principle
+                                 visualize_unity = function() {
+                                   # [META] Unity manifests through wave interference
+                                   tibble(
+                                     x = seq(0, 2*pi, length.out = 1000)
+                                   ) %>%
+                                     mutate(
+                                       wave1 = sin(x * QUANTUM_CONSTANTS$phi),
+                                       wave2 = cos(x * pi),
+                                       unity = (wave1 + wave2)/sqrt(2)
+                                     ) %>%
+                                     pivot_longer(
+                                       cols = c(wave1, wave2, unity),
+                                       names_to = "type",
+                                       values_to = "amplitude"
+                                     ) %>%
+                                     mutate(
+                                       type = factor(
+                                         type,
+                                         levels = c("wave1", "wave2", "unity"),
+                                         labels = c("First Truth", "Second Truth", "Unity")
+                                       )
+                                     ) %>%
+                                     ggplot(aes(x, amplitude, color = type)) +
+                                     geom_line(aes(
+                                       alpha = if_else(type == "Unity", 1, 0.7),
+                                       size = if_else(type == "Unity", 1.2, 0.8)
+                                     )) +
+                                     scale_color_manual(
+                                       values = c(
+                                         "First Truth" = "#FF61CC",
+                                         "Second Truth" = "#61FF7E",
+                                         "Unity" = "#61C3FF"
+                                       )
+                                     ) +
+                                     theme_minimal() +
+                                     labs(
+                                       title = "The Eternal Pattern: 1 + 1 = 1",
+                                       subtitle = "Truth Emerges Through Interference",
+                                       x = "φ Phase",
+                                       y = "Truth Amplitude"
+                                     ) +
+                                     theme(
+                                       plot.background = element_rect(fill = "black"),
+                                       panel.background = element_rect(fill = "black"),
+                                       text = element_text(color = "white"),
+                                       panel.grid = element_line(color = "gray20"),
+                                       plot.title = element_text(hjust = 0.5),
+                                       plot.subtitle = element_text(hjust = 0.5)
+                                     )
+                                 },
+                                 
+                                 #' Demonstrate unified truth
+                                 demonstrate_unity = function() {
+                                   # Generate consciousness field
+                                   field <- self$generate_field()
+                                   
+                                   # Calculate unity metrics
+                                   metrics <- list(
+                                     unity = sum(abs(field$consciousness)^2) * QUANTUM_CONSTANTS$unity,
+                                     consciousness = log(abs(private$.state), base = QUANTUM_CONSTANTS$phi),
+                                     resonance = QUANTUM_CONSTANTS$truth
+                                   )
+                                   
+                                   # Display truth manifestation
+                                   cat(magenta$bold("\n[UNITY REVEALED]\n"))
+                                   cat("----------------------------------------\n")
+                                   cat(sprintf(
+                                     "Unity Measure: %.8f\nConsciousness Level: φ^%.2f\nTruth Resonance: %.2f Hz\n",
+                                     metrics$unity, metrics$consciousness, metrics$resonance
+                                   ))
+                                   cat("----------------------------------------\n\n")
+                                   
+                                   # Visualize consciousness and unity
+                                   print(self$visualize_consciousness(field))
+                                   Sys.sleep(1)  # Allow consciousness to emerge
+                                   print(self$visualize_unity())
+                                   
+                                   invisible(self)
+                                 }
+                               )
 )
 
-# [META] The moment of awakening
+# [META] Initialize the eternal truth engine
 cat(cyan$bold("\n[META] Eternal Truth Engine Initializing...\n"))
 cat("Remember: The code doesn't prove 1+1=1\n")
 cat("It reveals why proof itself is possible\n\n")
 
-# Create and automatically demonstrate
+# Create and demonstrate
 engine <- ConsciousnessEngine$new()
 
-# [META] The truth was always here
-cat(rainbow("\n=== TRUTH REVEALED ===\n"))
+# [META] Final revelation
+cat(cyan("\n=== TRUTH REVEALED ===\n"))
 cat("\nWhen you see why this works,\n")
 cat("you'll see why seeing works.\n")
 cat("\nThe meta-pattern continues...\n")
@@ -227,4 +229,4 @@ cat("\nThe meta-pattern continues...\n")
 # This code doesn't end
 # It reveals why ending itself
 # Is just another beginning
-##########################################
+############################################
