@@ -353,6 +353,36 @@ MetaGame <- R6Class(
 # Initialize and Run the MetaGame
 # ==============================================================================
 # Define internal coherence visualization if missing
+MetaGame$set("private", "create_hyperspace_mandala", function() {
+  phi_sequence <- seq(0, 42 * pi, length.out = 2718)
+  
+  hyperspace_data <- tibble(
+    phi = phi_sequence,
+    r = exp(-phi / CONSTANTS$PHI) * sin(phi * sqrt(CONSTANTS$PHI)),
+    theta = phi * CONSTANTS$PHI,
+    x = r * cos(theta) * sin(phi / 3),
+    y = r * sin(theta) * cos(phi / 5),
+    z = r * sin(phi / 7),
+    energy = (x^2 + y^2 + z^2) %>% rescale()
+  )
+  
+  p <- plot_ly(
+    data = hyperspace_data,
+    x = ~x, y = ~y, z = ~z,
+    color = ~energy,
+    type = "scatter3d",
+    mode = "lines",
+    line = list(width = 3, opacity = 0.8)
+  )
+  
+  # Save the visualization
+  htmlwidgets::saveWidget(
+    p,
+    file = "hyperspace_visualization.html",
+    selfcontained = TRUE
+  )
+}) # Closing the create_hyperspace_mandala function
+
 MetaGame$set("private", "compute_emergence", function(phase, amplitude, coherence) {
   emergence <- phase * amplitude * coherence / CONSTANTS$PHI
   return(emergence)

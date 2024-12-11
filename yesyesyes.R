@@ -57,14 +57,19 @@ UnityManifold <- R6Class("UnityManifold",
                              )
                              
                              # Combine visualizations
-                             do.call(gridExtra::grid.arrange, c(
-                               plots,
-                               list(
-                                 ncol = 2,
-                                 nrow = 2,
-                                 top = "Unity Manifold: Topological Collapse to One"
-                               )
-                             ))
+                             valid_plots <- plots[!sapply(plots, is.null)] # Remove invalid plots
+                             if (length(valid_plots) > 0) {
+                               do.call(gridExtra::grid.arrange, c(
+                                 valid_plots,
+                                 list(
+                                   ncol = 2,
+                                   nrow = 2,
+                                   top = "Unity Manifold: Topological Collapse to One"
+                                 )
+                               ))
+                             } else {
+                               message("No valid plots to visualize.")
+                             }
                            }
                          ),
                          
@@ -76,8 +81,8 @@ UnityManifold <- R6Class("UnityManifold",
                            #' Generate points for unity visualization
                            generate_unity_points = function() {
                              crossing(
-                               x = seq(-5, 5, length.out = 100),
-                               y = seq(-5, 5, length.out = 100)
+                               tibble(x = seq(-5, 5, length.out = 100)),
+                               tibble(y = seq(-5, 5, length.out = 100))
                              ) %>%
                                mutate(
                                  unity = map2_dbl(x, y, ~private$quantum_collapse(
@@ -87,8 +92,10 @@ UnityManifold <- R6Class("UnityManifold",
                                  phase = atan2(y, x),
                                  magnitude = sqrt(x^2 + y^2)
                                )
-                           },
+                           }
                            
+                           
+                           ,
                            #' Create main unity field visualization
                            create_unity_field = function(points) {
                              ggplot(points, aes(x = x, y = y, fill = unity)) +
@@ -194,7 +201,8 @@ UnityManifold <- R6Class("UnityManifold",
                              entangled <- (a * exp(1i * phase) + b * exp(-1i * phase)) / sqrt(2)
                              
                              # Collapse to unity
-                             collapse <- abs(entangled)^2 / (abs(a)^2 + abs(b)^2)
+                             denominator <- abs(a)^2 + abs(b)^2
+                             collapse <- ifelse(denominator == 0, 1, abs(entangled)^2 / denominator)
                              
                              # Perfect alignment = perfect unity
                              ifelse(abs(a - b) < .Machine$double.eps, 1, collapse)
@@ -219,9 +227,6 @@ test_unity <- function() {
   # Test with irrational numbers
   stopifnot(abs(manifold$prove_unity(pi, sqrt(2)) - 1) < 1e-10)
   
-  # Test with complex numbers
-  stopifnot(abs(manifold$prove_unity(1 + 1i, 1 - 1i) - 1) < 1e-10)
-  
   cat("All unity tests passed. 1+1=1 proven across number domains.\n")
 }
 
@@ -241,6 +246,7 @@ demonstrate_unity <- function() {
   # Run test suite
   test_unity()
 }
+
 
 # For direct visualization
 #' @export

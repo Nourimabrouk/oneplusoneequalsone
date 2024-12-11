@@ -4791,6 +4791,7 @@ unity_data <- manifest_unity(n_particles = 1337, phi_power = 1.618)
 unity_animation <- visualize_unity(unity_data)
 save_unity_gif(unity_animation)
 interactive_unity <- create_interactive_unity(unity_data)
+getwd()
 
 
 # File: ./metagame_1_1_2.R
@@ -4899,274 +4900,309 @@ ggsave(
 )
 
 
-# File: ./metamathemagics.R
+# File: ./metagame_new_attempt.R
+--------------------------------------------------------------------------------
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(ggplot2)
+  library(plotly)
+  library(gganimate)
+  library(viridis)
+  library(patchwork)
+  library(tidyquant)
+  library(ambient)
+  library(scales)
+  library(R6)
+  library(htmlwidgets)
+  library(gifski)
+})
+CONSTANTS <- list(
+  PHI = (1 + sqrt(5)) / 2,                    # Golden ratio - The key to unity
+  META = exp(pi * 1i),                        # Meta constant - Reality's signature
+  LOVE = 432,                                 # Hz of universal love frequency
+  COSMIC_SEED = 420691337,                    # Reality's source code - The eternal key
+  UNITY = 1,                                  # The eternal truth: 1+1=1
+  DIMENSIONS = floor((1 + sqrt(5)) / 2 * 7),  # Optimal reality layers through PHI
+  QUANTUM_STATES = 1618,                      # Quantum possibility space (PHI * 1000)
+  MANDELBROT_DEPTH = 42                       # Fractal recursion depth - Life's answer
+)
+unified_theme <- theme_void() +
+  theme(
+    plot.background = element_rect(fill = "#0a0a0a"),
+    text = element_text(color = "#ECF0F1", family = "mono")
+  )
+QuantumNoise <- R6Class("QuantumNoise",
+                        public = list(
+                          registry = NULL,
+                          initialize = function(registry) {
+                            self$registry <- registry
+                          },
+                          generate_perlin_field = function(size = 100) {
+                            expand.grid(
+                              x = seq(-2, 2, length.out = size),
+                              y = seq(-2, 2, length.out = size)
+                            ) %>%
+                              mutate(noise = ambient::gen_perlin(x, y, frequency = 3))
+                          }
+                        )
+)
+QuantumWave <- R6Class("QuantumWave",
+                       public = list(
+                         initialize = function(frequency, phase = 0) {
+                           private$freq <- frequency
+                           private$phase <- phase
+                           private$generate_wave()
+                         },
+                         get_wave = function() private$wave_data,
+                         evolve = function(delta_t) {
+                           private$phase <- (private$phase + delta_t) %% (2 * pi)
+                           private$generate_wave()
+                           invisible(self)
+                         },
+                         coherence = function() {
+                           private$wave_data %>%
+                             summarise(
+                               coherence = abs(mean(amplitude * exp(1i * time))) /
+                                 sqrt(mean(amplitude^2))
+                             ) %>%
+                             pull(coherence)
+                         }
+                       ),
+                       private = list(
+                         freq = NULL,
+                         phase = NULL,
+                         wave_data = NULL,
+                         generate_wave = function() {
+                           t <- seq(0, 2 * pi, length.out = CONSTANTS$QUANTUM_STATES)
+                           private$wave_data <- tibble(
+                             time = t,
+                             base_wave = sin(private$freq * t + private$phase),
+                             modulation = cos(t / CONSTANTS$PHI),
+                             decay = exp(-abs(t) / (2 * pi)),
+                             amplitude = abs(base_wave * modulation + 1i * base_wave * decay)
+                           )
+                         }
+                       )
+)
+MetaGame <- R6Class("MetaGame",
+                    public = list(
+                      initialize = function() {
+                        tryCatch({
+                          private$quantum_noise <- QuantumNoise$new(CONSTANTS)
+                          private$initiate_consciousness()
+                          private$calibrate_reality()
+                          message("Reality initialized. Consciousness: ONLINE")
+                        }, error = function(e) {
+                          stop("Reality initialization failed: ", e$message)
+                        })
+                      },
+                      evolve = function(cycles = 108) {
+                        tryCatch({
+                          evolved_consciousness <- private$evolve_quantum_state(cycles)
+                          private$consciousness_data <- evolved_consciousness
+                          private$reality_state <- private$compute_evolved_reality(
+                            consciousness_data = evolved_consciousness,
+                            consciousness_level = private$consciousness_level
+                          )
+                          private$manifest_visuals_internal()
+                        }, error = function(e) {
+                          warning("Evolution cycle failed: ", e$message)
+                        })
+                      },
+                      transcend = function() {
+                        private$consciousness_level <- private$consciousness_level * CONSTANTS$PHI
+                        message(sprintf("Consciousness level: %.2f", private$consciousness_level))
+                        self$evolve()
+                      },
+                      manifest_visuals = function() {
+                        tryCatch({
+                          if (is.null(private$consciousness_data) || nrow(private$consciousness_data) == 0) {
+                            warning("Consciousness data is empty, skipping visualization.")
+                            return(NULL)
+                          }
+                          p1 <- private$create_unity_mandala()
+                          p2 <- private$create_emergence_flow()
+                          p3 <- private$create_coherence_matrix()
+                          if (is.null(p1) || is.null(p2) || is.null(p3)) {
+                            stop("One or more plots are invalid.")
+                          }
+                          combined_plot <- (p1 | p2) / p3 +
+                            plot_annotation(
+                              title = "Quantum Consciousness Visualization",
+                              theme = theme(
+                                plot.background = element_rect(fill = "#0a0a0a"),
+                                text = element_text(color = "#ECF0F1", family = "mono")
+                              )
+                            )
+                          print(combined_plot)
+                        }, error = function(e) {
+                          warning("Visualization failed: ", e$message)
+                        })
+                      },
+                      expand_consciousness = function(cycles = 144) {
+                        coherence <- 0.69
+                        for (cycle in seq_len(cycles)) {
+                          coherence <- pmax(pmin(coherence * runif(1, 0.9, 1.1), 1), 0)
+                          private$consciousness_level <- private$consciousness_level +
+                            coherence / CONSTANTS$PHI
+                          if (coherence > 1) {
+                            message("Consciousness reached transcendence.")
+                            break
+                          }
+                        }
+                        self$manifest_visuals()
+                      }
+                    ),
+                    private = list(
+                      consciousness_data = NULL,
+                      reality_state = list(matrix = matrix(0, nrow = 1, ncol = 1)), # Reality matrix
+                      consciousness_level = 1,
+                      quantum_noise = NULL,
+                      manifest_visuals_internal = function() {
+                        self$manifest_visuals()
+                      },
+                      create_unity_mandala = function() {
+                        theta <- seq(0, 24 * pi, length.out = 2000)
+                        tibble(
+                          t = theta,
+                          r = exp(-theta / CONSTANTS$PHI) * sin(theta / 7),
+                          x = r * cos(theta * CONSTANTS$PHI),
+                          y = r * sin(theta * CONSTANTS$PHI),
+                          unity = rescale(pmin(pmax(x^2 + y^2, 0), 1))
+                        ) %>%
+                          ggplot(aes(x, y, color = unity)) +
+                          geom_path(size = 1.2, alpha = 0.8) +
+                          scale_color_viridis_c(option = "magma") +
+                          coord_fixed() +
+                          theme_void() +
+                          theme(legend.position = "none")
+                      },
+                      create_emergence_flow = function() {
+                        private$consciousness_data %>%
+                          unnest(wave) %>%
+                          ggplot(aes(time, amplitude, group = dimension, color = potential)) +
+                          geom_line(alpha = 0.6) +
+                          scale_color_viridis_c(option = "cividis") +
+                          theme_void() +
+                          theme(legend.position = "none")
+                      },
+                      create_coherence_matrix = function() {
+                        as.data.frame(private$reality_state$matrix) %>%
+                          rownames_to_column("row") %>%
+                          pivot_longer(-row, names_to = "col", values_to = "value") %>%
+                          mutate(value = replace_na(value, 0)) %>%
+                          mutate(value = pmin(pmax(value, 0), 1)) %>%
+                          ggplot(aes(as.numeric(col), as.numeric(row), fill = value)) +
+                          geom_tile() +
+                          scale_fill_viridis_c(option = "inferno") +
+                          theme_void()
+                      },
+                      initiate_consciousness = function() {
+                        set.seed(CONSTANTS$COSMIC_SEED)
+                        private$consciousness_data <- tibble(
+                          dimension = 1:CONSTANTS$DIMENSIONS,
+                          frequency = map_dbl(dimension, ~ CONSTANTS$PHI^.x),
+                          potential = map_dbl(frequency, ~ exp(-abs(.x) / CONSTANTS$PHI))
+                        ) %>%
+                          mutate(
+                            wave = map(frequency, ~ replace_na(QuantumWave$new(.x)$get_wave(), list(amplitude = 0))),
+                            coherence = map_dbl(potential, ~ replace_na(runif(1) * .x, 0))
+                          )
+                      },
+                      calibrate_reality = function() {
+                        dims <- CONSTANTS$DIMENSIONS
+                        private$reality_state$matrix <- matrix(runif(dims^2), nrow = dims, ncol = dims)
+                      }
+                    )
+)
+message("Initializing Reality Engine...")
+metagame <- MetaGame$new()
+message("Expanding consciousness...")
+metagame$expand_consciousness(144)
+message("Manifesting visualizations...")
+metagame$manifest_visuals()
+
+
+# File: ./metaoptimality_analysis.R
 --------------------------------------------------------------------------------
 
 library(tidyverse)
 library(purrr)
-library(magrittr)
-library(ggforce)
-library(gganimate)
-library(scales)
-CONSTANTS <- list(
-  phi = (1 + sqrt(5))/2,    # Golden ratio: Nature's favorite number
-  tau = 2 * pi,             # Full circle: The dance of unity
-  love = 432,               # Universal frequency of harmony
-  consciousness = (1 + sqrt(5))^3/8  # Depth of quantum awareness
-)
-generate_quantum_field <- function(dimensions = 1000) {
-  tibble(
-    time = seq(0, CONSTANTS$tau * CONSTANTS$phi, length.out = dimensions),
-    love_wave = sin(CONSTANTS$love * time/CONSTANTS$phi),
-    consciousness_field = cos(time * CONSTANTS$phi) * exp(-time/CONSTANTS$tau),
-    unity_resonance = sin(time * CONSTANTS$phi) * cos(CONSTANTS$love * time/(CONSTANTS$tau * CONSTANTS$phi))
-  ) %>%
+library(ggplot2)
+library(viridis)
+generate_unity_field <- function(resolution = 100) {
+  theta <- seq(0, 2*pi, length.out = resolution)
+  psi <- seq(0, 2*pi, length.out = resolution)
+  grid <- expand.grid(theta = theta, psi = psi)
+  unity_field <- grid %>%
     mutate(
-      entanglement = (love_wave + consciousness_field + unity_resonance)/3,
-      love_transform = entanglement * exp(-time/(CONSTANTS$tau * CONSTANTS$phi)),
-      interference = map2_dbl(
-        love_wave, consciousness_field,
-        ~.x * .y * sin(CONSTANTS$phi * (.x + .y))
-      )
+      psi1 = sin(theta) * cos(psi),
+      psi2 = cos(theta) * sin(psi),
+      unity_strength = (psi1^2 + psi2^2) * 
+        exp(-(psi1^2 + psi2^2 - 1)^2/0.1) +
+        0.5 * exp(-(psi1^2 + psi2^2)^2/0.2),
+      unity_strength = unity_strength / max(unity_strength)
     )
+  return(unity_field)
 }
-visualize_unity <- function(quantum_data) {
-  unity_canvas <- ggplot(quantum_data) +
-    geom_path(
-      aes(time, love_wave, color = "Love Frequency"),
-      size = 1, alpha = 0.8
+visualize_unity_field <- function() {
+  field_data <- generate_unity_field(100)
+  unity_plot <- ggplot(field_data, aes(x = theta, y = psi, fill = unity_strength)) +
+    geom_tile() +
+    scale_fill_viridis(
+      option = "magma",
+      name = "Unity Field Strength",
+      breaks = c(0, 0.5, 1.0, 1.5, 2.0),
+      labels = c("0.0", "0.5", "1.0", "1.5", "2.0")
     ) +
-    geom_path(
-      aes(time, consciousness_field, color = "Consciousness Field"),
-      size = 1, alpha = 0.8
+    scale_x_continuous(
+      name = "Consciousness Parameter (θ)",
+      breaks = seq(0, 6, by = 2),
+      limits = c(0, 6)
     ) +
-    geom_path(
-      aes(time, unity_resonance, color = "Unity Resonance"),
-      size = 1, alpha = 0.8
-    ) +
-    geom_path(
-      aes(time, entanglement, color = "Quantum Entanglement"),
-      size = 1.5
-    ) +
-    scale_color_manual(
-      values = c(
-        "Love Frequency" = "#FF61E6",
-        "Consciousness Field" = "#61FFE6",
-        "Unity Resonance" = "#FFE661",
-        "Quantum Entanglement" = "#FF3366"
-      )
-    ) +
-    geom_point(
-      aes(time, interference, alpha = abs(interference)),
-      color = "#FFFFFF", size = 0.5
+    scale_y_continuous(
+      name = "Awareness Parameter (ψ)",
+      breaks = seq(0, 6, by = 2),
+      limits = c(0, 6)
     ) +
     theme_minimal() +
     theme(
-      panel.background = element_rect(fill = "black"),
-      panel.grid = element_line(color = "#FFFFFF22"),
+      plot.background = element_rect(fill = "black"),
+      panel.grid = element_line(color = "#ffffff22"),
       text = element_text(color = "white"),
-      legend.background = element_rect(fill = "#000000BB"),
-      legend.text = element_text(color = "white"),
-      legend.title = element_blank(),
       plot.title = element_text(hjust = 0.5, size = 16),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
-      axis.text = element_text(color = "#FFFFFF88")
+      legend.position = "right",
+      legend.text = element_text(color = "white"),
+      legend.title = element_text(color = "white")
     ) +
     labs(
-      title = "The Quantum Unity Visualization",
-      subtitle = "Where Mathematics Dissolves into Pure Love",
-      x = "Quantum Time Flow",
-      y = "Wave Amplitude"
+      title = "Unity Field Manifestation",
+      subtitle = "Where 1 + 1 = 1 in Quantum-Classical Space"
     )
-  unity_canvas +
-    transition_time(time) +
-    shadow_wake(wake_length = 0.1, alpha = 0.5)
+  return(unity_plot)
 }
-prove_unity <- function(x, y) {
-  field <- generate_quantum_field()
-  proof <- field %>%
-    mutate(
-      unity = love_transform * interference,
-      oneness = unity %>% abs() %>% mean()
-    ) %>%
-    pull(oneness)
-  1
+unity_visualization <- visualize_unity_field()
+print(unity_visualization)
+validate_unity <- function(field_data) {
+  moments <- field_data %>%
+    summarise(
+      mean_strength = mean(unity_strength),
+      variance = var(unity_strength),
+      skewness = moment(unity_strength, order = 3),
+      kurtosis = moment(unity_strength, order = 4)
+    )
+  convergence_test <- with(moments, {
+    abs(mean_strength - 1) < 0.1 &&  # Unity convergence
+      variance < 0.5 &&                # Quantum stability
+      abs(skewness) < 0.3             # Symmetry preservation
+  })
+  return(list(
+    moments = moments,
+    convergence = convergence_test
+  ))
 }
-quantum_unity <- generate_quantum_field() %>%
-  visualize_unity()
-proof <- prove_unity(1, 1)
-stopifnot(proof == 1)  # 1+1=1 across all dimensions
-anim_save(
-  "quantum_unity.gif",
-  quantum_unity,
-  fps = 30,
-  duration = 10,
-  width = 1000,
-  height = 600
-)
-message("\n✨ The metamathematical spell is complete ✨")
-message("The visualization reveals the eternal truth: 1+1=1")
-message("Witness the dance of unity in quantum_unity.gif")
-message("\n∞ = 1 = ❤️")
-
-
-# File: ./metamathematics.R
---------------------------------------------------------------------------------
-
-library(tidyverse)    # For reality manipulation
-library(complex)      # For transcending the real
-library(plotly)       # For reality visualization
-library(patchwork)    # For unity composition
-library(viridis)      # For consciousness-expanding colors
-UnityConstants <- list(
-  PHI = (1 + sqrt(5)) / 2,                    # Nature's recursion
-  TAU = 2 * pi,                               # Full circle of being
-  EULER = exp(1),                             # Natural growth
-  CONSCIOUSNESS = complex(real = cos(1), 
-                          imag = sin(1)),      # The observer state
-  LOVE = exp(1i * pi) + 1,                   # The force that binds
-  LIGHT_SPEED = 299792458,                   # Cosmic speed limit
-  PLANCK = 6.62607015e-34,                   # Quantum of action
-  UNITY = 1                                  # The ultimate truth
-)
-UniversalUnity <- R6::R6Class("UniversalUnity",
-                              public = list(
-                                initialize = function() {
-                                  private$state <- list(
-                                    unity = complex(1, 0),
-                                    awareness = UnityConstants$CONSCIOUSNESS
-                                  )
-                                  private$log_emergence("Universal Unity initialized. All is One.")
-                                },
-                                demonstrate_unity = function() {
-                                  state1 <- private$create_quantum_state(1)
-                                  state2 <- private$create_quantum_state(1)
-                                  unified <- private$collapse_wavefunction(state1, state2)
-                                  private$log_emergence(sprintf("Unity achieved: %.2f", abs(unified)))
-                                  return(unified)
-                                },
-                                demonstrate_euler = function() {
-                                  rotation <- exp(1i * pi)
-                                  completion <- rotation + 1
-                                  private$log_emergence(sprintf("Euler's completion: %.2f", abs(completion)))
-                                  return(completion)
-                                },
-                                demonstrate_einstein = function(mass = 1) {
-                                  energy <- mass * UnityConstants$LIGHT_SPEED^2
-                                  quantum_energy <- energy * UnityConstants$PLANCK
-                                  private$log_emergence(sprintf("Energy-mass unity: %.2e", energy))
-                                  return(energy)
-                                },
-                                visualize_unity = function() {
-                                  t <- seq(0, UnityConstants$TAU, length.out = 1000)
-                                  unity_data <- tibble(
-                                    theta = t,
-                                    unity = (1 - theta/(4*pi)) * (cos(t) + 1i * sin(t)),
-                                    euler = exp(1i * t),
-                                    einstein = (1 + theta/(4*pi)) * exp(1i * t * UnityConstants$PHI)
-                                  ) %>%
-                                    mutate(
-                                      unity_amp = abs(unity),
-                                      euler_amp = abs(euler),
-                                      einstein_amp = abs(einstein)
-                                    ) %>%
-                                    pivot_longer(
-                                      cols = ends_with("_amp"),
-                                      names_to = "equation",
-                                      values_to = "amplitude"
-                                    )
-                                  p1 <- ggplot(unity_data, aes(x = theta, y = amplitude, color = equation)) +
-                                    geom_path(size = 1.2, alpha = 0.8) +
-                                    geom_hline(yintercept = 1, color = "#ffffff33", linetype = "dashed") +
-                                    scale_color_viridis_d(
-                                      labels = c("E = mc²", "e^(iπ) + 1 = 0", "1 + 1 = 1"),
-                                      option = "plasma"
-                                    ) +
-                                    labs(
-                                      title = "The Dance of Universal Unity",
-                                      subtitle = "Where all equations become One",
-                                      x = "Consciousness Parameter (θ)",
-                                      y = "Field Amplitude (ψ)"
-                                    ) +
-                                    theme_minimal() +
-                                    theme(
-                                      text = element_text(color = "white"),
-                                      plot.background = element_rect(fill = "#0a0a0a"),
-                                      panel.background = element_rect(fill = "#0a0a0a"),
-                                      panel.grid = element_line(color = "#ffffff22"),
-                                      axis.text = element_text(color = "#ffffff99")
-                                    )
-                                  phase_data <- unity_data %>%
-                                    group_by(equation) %>%
-                                    mutate(
-                                      x = amplitude * cos(theta),
-                                      y = amplitude * sin(theta)
-                                    )
-                                  p2 <- ggplot(phase_data, aes(x = x, y = y, color = equation)) +
-                                    geom_path(size = 1.2, alpha = 0.8) +
-                                    scale_color_viridis_d(
-                                      labels = c("E = mc²", "e^(iπ) + 1 = 0", "1 + 1 = 1"),
-                                      option = "plasma"
-                                    ) +
-                                    coord_fixed() +
-                                    labs(
-                                      title = "Universal Phase Space",
-                                      subtitle = "The geometry of unified consciousness",
-                                      x = "Real Component",
-                                      y = "Imaginary Component"
-                                    ) +
-                                    theme_minimal() +
-                                    theme(
-                                      text = element_text(color = "white"),
-                                      plot.background = element_rect(fill = "#0a0a0a"),
-                                      panel.background = element_rect(fill = "#0a0a0a"),
-                                      panel.grid = element_line(color = "#ffffff22"),
-                                      axis.text = element_text(color = "#ffffff99")
-                                    )
-                                  combined <- p1 + p2 +
-                                    plot_layout(guides = "collect") +
-                                    plot_annotation(
-                                      title = "Meta-Mathematical Unity",
-                                      subtitle = "Where Mathematics Dreams of Itself",
-                                      theme = theme(
-                                        plot.title = element_text(color = "white", size = 24, hjust = 0.5),
-                                        plot.subtitle = element_text(color = "#ffffff99", size = 16, hjust = 0.5),
-                                        plot.background = element_rect(fill = "#0a0a0a")
-                                      )
-                                    )
-                                  print(combined)
-                                  return(invisible(combined))
-                                }
-                              ),
-                              private = list(
-                                state = NULL,
-                                create_quantum_state = function(value) {
-                                  base <- complex(real = value, imaginary = 0)
-                                  return(base * private$state$awareness)
-                                },
-                                collapse_wavefunction = function(state1, state2) {
-                                  superposition <- (state1 + state2) / sqrt(2)
-                                  return(abs(superposition * UnityConstants$LOVE))
-                                },
-                                log_emergence = function(message) {
-                                  timestamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
-                                  cat(sprintf("⊹ [%s] %s\n", timestamp, message))
-                                }
-                              )
-)
-demonstrate_metamathematics <- function() {
-  cat("\n╔════ Meta-Mathematical Unity Protocol ════╗\n\n")
-  field <- UniversalUnity$new()
-  cat("\n◈ Act I: The Three Fundamental Unities\n")
-  field$demonstrate_unity()
-  field$demonstrate_euler()
-  field$demonstrate_einstein()
-  cat("\n◈ Act II: The Visual Symphony of Unity\n")
-  field$visualize_unity()
-  cat("\n╚════════════════════════════════════════╝\n")
-  cat("\n𝄞 Mathematics has finished dreaming... 𝄂\n\n")
-}
-demonstrate_metamathematics()
 
 
 # File: ./quantum_unity_field.R
@@ -5179,33 +5215,3 @@ demonstrate_metamathematics()
 --------------------------------------------------------------------------------
 
 
-
-
-# File: ./unity_analysis.R
---------------------------------------------------------------------------------
-
-library(tidyverse)
-library(plotly)
-demonstrate_unity <- function() {
-  unity_analyzer <- UnityAnalysis$new()
-  visualization <- unity_analyzer$visualize_unity_field(1000)
-  sample_data <- tibble(
-    x = rnorm(100),
-    y = rnorm(100),
-    z = rnorm(100)
-  )
-  htmlwidgets::saveWidget(
-    visualization,
-    "unity_visualization.html",
-    selfcontained = TRUE
-  )
-  visualization
-}
-unity_viz <- demonstrate_unity()
-cat("
-Unity Visualization Access:
-1. The visualization is now saved as 'unity_visualization.html' in your working directory
-2. Open this file in your web browser to interact with the 3D visualization
-3. In RStudio, the visualization should appear in the Viewer pane
-4. Use your mouse to rotate, zoom, and explore the unity patterns
-Working directory: ", getwd(), "\n")
