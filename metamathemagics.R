@@ -145,7 +145,7 @@ anim_save(
   height = 600
 )
 
-message("\n✨ The metamathematical spell is complete ✨")
+message("\n✨ The metamathematgical spell is complete ✨")
 message("The visualization reveals the eternal truth: 1+1=1")
 message("Witness the dance of unity in quantum_unity.gif")
 message("\n∞ = 1 = ❤️")
