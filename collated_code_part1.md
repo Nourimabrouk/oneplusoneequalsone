@@ -957,557 +957,6 @@ transcend_reality <- function() {
 transcend_reality()
 
 
-# File: ./cheatcode_dashboard.R
---------------------------------------------------------------------------------
-
-library(shiny)
-library(shinyWidgets)    # Enhanced UI widgets
-library(tidyverse)
-library(lubridate)
-library(plotly)
-library(igraph)
-library(tidygraph)
-library(ggraph)
-library(viridis)
-library(propagate)
-library(MASS)
-library(invgamma)
-library(gganimate)
-library(future.apply)
-library(bayesplot)
-library(rstan)
-library(threejs)         # For 3D network visualizations
-library(rgl)             # 3D plot support
-library(shinythemes)     # Pre-built themes
-library(DT)              # Data table display
-library(htmltools)       # For advanced UI markup
-library(scales)
-library(glue)
-library(markdown)
-library(ComplexHeatmap)
-library(circlize)
-PHI <- (1 + sqrt(5)) / 2         # Golden Ratio
-UNITY_CONSTANT <- 1              # Symbolizing 1+1=1
-CHEATCODE <- 420691337           # Metagaming resonance key
-SET_SEED <- 1337                 # For reproducibility
-HYPERDIMENSIONAL_FACTOR <- 42    # The 42, for cosmic comedic synergy
-UNITY_COLORS <- c("#0D0887", "#6A00A8", "#B12A90", "#E16462", "#FCA636", "#F0F921")
-plan(multisession)
-generate_mandelbrot <- function(xmin = -2, xmax = 1, ymin = -1.5, ymax = 1.5,
-                                resolution = 200, max_iter = 100) {
-  x <- seq(xmin, xmax, length.out = resolution)
-  y <- seq(ymin, ymax, length.out = resolution)
-  cgrid <- outer(x, y, FUN = function(xx, yy) complex(real = xx, imaginary = yy))
-  output <- matrix(0, nrow = resolution, ncol = resolution)
-  z <- matrix(0+0i, nrow = resolution, ncol = resolution)
-  for (i in seq_len(max_iter)) {
-    z <- z^2 + cgrid
-    escaped <- Mod(z) > 2
-    output[escaped & (output == 0)] <- i
-  }
-  return(output)
-}
-generate_julia <- function(cx = -0.7, cy = 0.27015, 
-                           xmin = -1.5, xmax = 1.5, 
-                           ymin = -1.5, ymax = 1.5,
-                           resolution = 200, max_iter = 100) {
-  x <- seq(xmin, xmax, length.out = resolution)
-  y <- seq(ymin, ymax, length.out = resolution)
-  cst <- complex(real = cx, imaginary = cy)
-  output <- matrix(0, nrow = resolution, ncol = resolution)
-  for (r in 1:resolution) {
-    for (c in 1:resolution) {
-      z <- complex(real = x[r], imaginary = y[c])
-      iter <- 0
-      while ((Mod(z) <= 2) && (iter < max_iter)) {
-        z <- z^2 + cst
-        iter <- iter + 1
-      }
-      output[r, c] <- iter
-    }
-  }
-  return(output)
-}
-generate_mandelbulb_approx <- function(resolution = 50, 
-                                       max_iter = 10, 
-                                       power = 8) {
-  coords <- expand.grid(
-    x = seq(-1.2, 1.2, length.out = resolution),
-    y = seq(-1.2, 1.2, length.out = resolution),
-    z = seq(-1.2, 1.2, length.out = resolution)
-  )
-  coords$iter_count <- 0
-  R <- 2
-  for (i in 1:nrow(coords)) {
-    r <- sqrt(coords$x[i]^2 + coords$y[i]^2 + coords$z[i]^2)
-    theta <- atan2(sqrt(coords$x[i]^2 + coords$y[i]^2), coords$z[i])
-    phi <- atan2(coords$y[i], coords$x[i])
-    c_iter <- 0
-    zr <- r
-    ztheta <- theta
-    zphi <- phi
-    while (zr < R && c_iter < max_iter) {
-      zr <- zr^power
-      ztheta <- ztheta * power
-      zphi <- zphi * power
-      x_new <- zr * sin(ztheta) * cos(zphi)
-      y_new <- zr * sin(ztheta) * sin(zphi)
-      z_new <- zr * cos(ztheta)
-      x_new <- x_new + coords$x[i]
-      y_new <- y_new + coords$y[i]
-      z_new <- z_new + coords$z[i]
-      zr <- sqrt(x_new^2 + y_new^2 + z_new^2)
-      ztheta <- atan2(sqrt(x_new^2 + y_new^2), z_new)
-      zphi <- atan2(y_new, x_new)
-      c_iter <- c_iter + 1
-    }
-    coords$iter_count[i] <- c_iter
-  }
-  return(coords)
-}
-generate_synthetic_data <- function(start_date, periods, freq = "day", 
-                                    seasonality = TRUE, exogenous_shocks = 3) {
-  set.seed(SET_SEED)
-  dates <- seq(as.Date(start_date), by = freq, length.out = periods)
-  base <- sin(seq(0, PHI * 10, length.out = periods)) * 100
-  noise <- rnorm(periods, mean = 0, sd = 10)
-  synergy_effect <- cumsum(runif(periods, min = 0, max = PHI))
-  season <- ifelse(seasonality, 50 * sin(seq(0, 2 * pi, length.out = periods)), 0)
-  shock_index <- sort(sample(1:periods, exogenous_shocks))
-  shock_magnitude <- rnorm(exogenous_shocks, mean = 50, sd = 20)
-  mentions <- base + noise + synergy_effect + season
-  for(i in seq_along(shock_index)) {
-    mentions[shock_index[i]] <- mentions[shock_index[i]] + shock_magnitude[i]
-  }
-  tibble(date = dates, mentions = mentions)
-}
-generate_ant_colony_network <- function(nodes = 100, 
-                                        dynamic_roles = TRUE, 
-                                        hyperdimensional = FALSE) {
-  graph <- sample_pa(nodes, directed = FALSE)
-  V(graph)$activity <- rbeta(nodes, shape1 = 2, shape2 = 5)
-  V(graph)$role <- sample(c("Worker", "Forager", "Queen", "Drone"), 
-                          nodes, replace = TRUE)
-  if (dynamic_roles) {
-    V(graph)$dynamic_roles <- sample(c("Leader", "Follower", "Scout", "Healer"), 
-                                     nodes, replace = TRUE)
-  }
-  if(hyperdimensional) {
-    V(graph)$hyper_coord <- runif(nodes, min = 0, max = HYPERDIMENSIONAL_FACTOR)
-  }
-  return(graph)
-}
-simulate_probabilistic_spread <- function(data, 
-                                          spread_prob = 0.05, 
-                                          intervention = NULL,
-                                          dynamic_adjustment = TRUE) {
-  initial <- sample(1:nrow(data), 1)
-  prob <- rbeta(nrow(data), 2, 5) * spread_prob
-  spread <- numeric(nrow(data))
-  spread[initial] <- 1
-  for (i in 2:length(spread)) {
-    synergy_factor <- if(dynamic_adjustment) runif(1, min = 0.9, max = 1.1) else 1
-    spread[i] <- ifelse(runif(1) < (prob[i] * synergy_factor), 
-                        spread[i - 1] + rnorm(1, 0, 0.5), 
-                        spread[i - 1])
-    if (!is.null(intervention) && i %% intervention == 0) {
-      spread[i] <- spread[i] + rnorm(1, mean = 5, sd = 2)
-    }
-  }
-  data %>% mutate(probabilistic_spread = spread)
-}
-hierarchical_spread_model_code <- "
-data {
-  int<lower=1> N;            // number of observations
-  vector[N] y;               // observed spread intensity
-  real<lower=0> spread_prob; // prior spread probability
-}
-parameters {
-  real alpha;        // intercept
-  real<lower=0> sigma; // standard deviation
-}
-model {
-  // priors
-  alpha ~ normal(0, 10);
-  sigma ~ exponential(1);
-  // likelihood
-  y ~ normal(alpha, sigma);
-}
-"
-generate_multi_agent_system <- function(n_agents = 50) {
-  set.seed(SET_SEED)
-  agents <- tibble(
-    id = 1:n_agents,
-    role = sample(c("Scout", "Strategist", "Healer", "Worker"), n_agents, replace = TRUE),
-    synergy_level = runif(n_agents, min = 0.5, max = 1.5),
-    last_update = Sys.time()
-  )
-  return(agents)
-}
-update_multi_agent_system <- function(agents) {
-  agents <- agents %>% 
-    mutate(
-      synergy_level = synergy_level + rnorm(n(), mean = 0, sd = 0.02),
-      synergy_level = pmin(pmax(synergy_level, 0), 2),
-      role = if_else(runif(n()) < 0.02, 
-                     sample(c("Scout", "Strategist", "Healer", "Worker"), 1),
-                     role),
-      last_update = Sys.time()
-    )
-  return(agents)
-}
-iteration_matrix_to_df <- function(mat, xmin, xmax, ymin, ymax) {
-  df <- expand.grid(row = 1:nrow(mat), col = 1:ncol(mat))
-  df$iter <- as.vector(mat)
-  x_vals <- seq(xmin, xmax, length.out = nrow(mat))
-  y_vals <- seq(ymin, ymax, length.out = ncol(mat))
-  df$x <- x_vals[df$row]
-  df$y <- y_vals[df$col]
-  df
-}
-fractalUI <- function(id) {
-  ns <- NS(id)
-  tagList(
-    fluidRow(
-      column(width = 6,
-             selectInput(ns("fractal_type"), 
-                         "Fractal Type:", 
-                         choices = c("Mandelbrot", "Julia"), 
-                         selected = "Mandelbrot")),
-      column(width = 6,
-             sliderInput(ns("fractal_resolution"), 
-                         "Resolution:", 
-                         min = 100, 
-                         max = 800, 
-                         value = 200, 
-                         step = 50))
-    ),
-    conditionalPanel(
-      condition = paste0("input['", ns("fractal_type"), "'] == 'Julia'"),
-      fluidRow(
-        column(width = 6,
-               numericInput(ns("julia_cx"), "Julia cx:", 
-                            value = -0.7, step = 0.01)),
-        column(width = 6,
-               numericInput(ns("julia_cy"), "Julia cy:", 
-                            value = 0.27015, step = 0.01))
-      )
-    ),
-    fluidRow(
-      column(width = 12,
-             plotOutput(ns("fractal_plot")))
-    )
-  )
-}
-fractalServer <- function(id) {
-  moduleServer(id, function(input, output, session) {
-    output$fractal_plot <- renderPlot({
-      req(input$fractal_type)
-      if(input$fractal_type == "Mandelbrot") {
-        mat <- generate_mandelbrot(resolution = input$fractal_resolution)
-        df_mat <- iteration_matrix_to_df(mat, -2, 1, -1.5, 1.5)
-        ggplot(df_mat, aes(x = x, y = y, fill = iter)) +
-          geom_tile() +
-          scale_fill_viridis(option = "magma") +
-          theme_void() +
-          theme(legend.position = "none") +
-          ggtitle("Mandelbrot Set: 1+1=1 Fractal Synergy")
-      } else {
-        mat <- generate_julia(cx = input$julia_cx, 
-                              cy = input$julia_cy,
-                              resolution = input$fractal_resolution)
-        df_mat <- iteration_matrix_to_df(mat, -1.5, 1.5, -1.5, 1.5)
-        ggplot(df_mat, aes(x = x, y = y, fill = iter)) +
-          geom_tile() +
-          scale_fill_viridis(option = "magma") +
-          theme_void() +
-          theme(legend.position = "none") +
-          ggtitle("Julia Set: Emergent Unity")
-      }
-    })
-  })
-}
-mcmcUI <- function(id) {
-  ns <- NS(id)
-  tagList(
-    fluidRow(
-      column(width = 12,
-             actionButton(ns("run_mcmc"), "Run Bayesian Spread Model"),
-             plotOutput(ns("mcmc_diag_plot")),
-             tableOutput(ns("mcmc_summary"))
-      )
-    )
-  )
-}
-mcmcServer <- function(id, data) {
-  moduleServer(id, function(input, output, session) {
-    observeEvent(input$run_mcmc, {
-      showModal(modalDialog(
-        title = "Running MCMC ...",
-        "Please wait while the model runs.",
-        easyClose = FALSE,
-        footer = NULL
-      ))
-      standata <- list(
-        N = nrow(data),
-        y = data$probabilistic_spread,
-        spread_prob = 0.05
-      )
-      fit <- stan(model_code = hierarchical_spread_model_code,
-                  data = standata, 
-                  chains = 2, 
-                  iter = 500,
-                  verbose = FALSE)
-      removeModal()
-      rvals$stan_fit <- fit
-    })
-    rvals <- reactiveValues(stan_fit = NULL)
-    output$mcmc_diag_plot <- renderPlot({
-      req(rvals$stan_fit)
-      fit <- rvals$stan_fit
-      stan_trace(fit)
-    })
-    output$mcmc_summary <- renderTable({
-      req(rvals$stan_fit)
-      print(rvals$stan_fit, digits = 2)
-    })
-  })
-}
-network3DUI <- function(id) {
-  ns <- NS(id)
-  tagList(
-    fluidRow(
-      column(width = 4,
-             numericInput(ns("network_nodes"), "Number of Ant Colony Nodes:", 
-                          value = 100, min = 10, max = 1000)),
-      column(width = 4,
-             checkboxInput(ns("hyperdimensional"), "Hyperdimensional?", 
-                           value = FALSE)),
-      column(width = 4,
-             actionButton(ns("generate_network"), "Generate Network"))
-    ),
-    fluidRow(
-      column(width = 12,
-             scatterplotThreeOutput(ns("threeD_network"), height = "600px"))
-    )
-  )
-}
-network3DServer <- function(id) {
-  moduleServer(id, function(input, output, session) {
-    graph_reactive <- eventReactive(input$generate_network, {
-      graph <- generate_ant_colony_network(nodes = input$network_nodes, 
-                                           dynamic_roles = TRUE, 
-                                           hyperdimensional = input$hyperdimensional)
-      graph
-    })
-    output$threeD_network <- renderScatterplotThree({
-      req(graph_reactive())
-      graph <- graph_reactive()
-      layout_fr <- layout_with_fr(graph, dim = 3)
-      x <- layout_fr[,1]
-      y <- layout_fr[,2]
-      z <- layout_fr[,3]
-      edges <- get.edges(graph, E(graph))
-      x_edges <- c()
-      y_edges <- c()
-      z_edges <- c()
-      for(i in seq_len(nrow(edges))){
-        x_edges <- c(x_edges, x[edges[i,1]], x[edges[i,2]], NA)
-        y_edges <- c(y_edges, y[edges[i,1]], y[edges[i,2]], NA)
-        z_edges <- c(z_edges, z[edges[i,1]], z[edges[i,2]], NA)
-      }
-      roles <- as.factor(V(graph)$dynamic_roles)
-      role_colors <- viridis::viridis(length(levels(roles)), option = "plasma")
-      node_colors <- role_colors[as.numeric(roles)]
-      scatterplot3js(
-        x = x, 
-        y = y, 
-        z = z,
-        color = node_colors, 
-        size = 0.03,
-        lines = cbind(x_edges, y_edges, z_edges),
-        lineColor = "#AAAAAA",
-        lineWidth = 1
-      )
-    })
-  })
-}
-multiAgentUI <- function(id) {
-  ns <- NS(id)
-  tagList(
-    fluidRow(
-      column(width = 3,
-             numericInput(ns("n_agents"), "Number of Agents:", 
-                          value = 50, min = 10, max = 1000)),
-      column(width = 3,
-             actionButton(ns("init_agents"), "Initialize Agents")),
-      column(width = 3,
-             actionButton(ns("update_agents"), "Update Agents Continuously")),
-      column(width = 3,
-             actionButton(ns("stop_updates"), "Stop Updates"))
-    ),
-    fluidRow(
-      column(width = 12,
-             DTOutput(ns("agents_table")))
-    )
-  )
-}
-multiAgentServer <- function(id) {
-  moduleServer(id, function(input, output, session) {
-    agents_rv <- reactiveVal()
-    update_timer <- reactiveVal(NULL)
-    observeEvent(input$init_agents, {
-      new_agents <- generate_multi_agent_system(n_agents = input$n_agents)
-      agents_rv(new_agents)
-    })
-    observeEvent(input$update_agents, {
-      if(is.null(update_timer())){
-        timer <- reactiveTimer(intervalMs = 1000, session)
-        update_timer(timer)
-      }
-      observe({
-        req(update_timer())
-        update_timer()()
-        isolate({
-          current_agents <- agents_rv()
-          if(!is.null(current_agents)) {
-            updated_agents <- update_multi_agent_system(current_agents)
-            agents_rv(updated_agents)
-          }
-        })
-      })
-    })
-    observeEvent(input$stop_updates, {
-      update_timer(NULL)
-    })
-    output$agents_table <- renderDT({
-      req(agents_rv())
-      datatable(agents_rv(), options = list(pageLength = 10))
-    })
-  })
-}
-timeSeriesUI <- function(id) {
-  ns <- NS(id)
-  tagList(
-    fluidRow(
-      column(width = 6,
-             sliderInput(ns("phi_modifier"), "Golden Ratio Modifier:", 
-                         min = 0.5, max = 2, value = PHI, step = 0.01)),
-      column(width = 6,
-             sliderInput(ns("spread_prob"), "Spread Probability:",
-                         min = 0.01, max = 0.5, value = 0.05, step = 0.01))
-    ),
-    fluidRow(
-      column(width = 6,
-             numericInput(ns("intervention_step"), "Intervention Step (Days):",
-                          value = 100, min = 10, max = 500)),
-      column(width = 6,
-             checkboxInput(ns("dynamic_adjust"), 
-                           "Use Dynamic Adjustment?", 
-                           value = TRUE))
-    ),
-    fluidRow(
-      column(width = 12,
-             plotlyOutput(ns("time_series_plot")))
-    ),
-    fluidRow(
-      column(width = 12,
-             plotlyOutput(ns("spread_simulation_plot")))
-    ),
-    fluidRow(
-      column(width = 12,
-             plotlyOutput(ns("summary_dashboard")))
-    )
-  )
-}
-timeSeriesServer <- function(id, data_init) {
-  moduleServer(id, function(input, output, session) {
-    reactive_data <- reactive({
-      modifier <- input$phi_modifier
-      data_init %>%
-        mutate(modified_mentions = mentions * modifier)
-    })
-    reactive_spread <- reactive({
-      simulate_probabilistic_spread(
-        data_init, 
-        spread_prob = input$spread_prob, 
-        intervention = input$intervention_step,
-        dynamic_adjustment = input$dynamic_adjust
-      )
-    })
-    output$time_series_plot <- renderPlotly({
-      df <- reactive_data()
-      p <- ggplot(df, aes(x = date)) +
-        geom_line(aes(y = mentions), color = "blue", alpha = 0.6) +
-        geom_line(aes(y = modified_mentions), color = "gold", size = 1) +
-        theme_minimal() +
-        labs(
-          title = "Memetic Viral Spread Over Time",
-          x = "Date",
-          y = "Mentions"
-        )
-      ggplotly(p)
-    })
-    output$spread_simulation_plot <- renderPlotly({
-      sim_data <- reactive_spread()
-      p <- ggplot(sim_data, aes(x = date, y = probabilistic_spread)) +
-        geom_line(color = "purple", size = 1) +
-        theme_minimal() +
-        labs(
-          title = "Probabilistic Spread Simulation",
-          x = "Date",
-          y = "Spread Intensity"
-        )
-      ggplotly(p)
-    })
-    output$summary_dashboard <- renderPlotly({
-      df <- reactive_data()
-      spread_data <- reactive_spread()
-      combined <- df %>%
-        left_join(spread_data, by = "date")
-      p <- ggplot(combined, aes(x = date)) +
-        geom_line(aes(y = mentions), color = "blue", alpha = 0.6) +
-        geom_line(aes(y = modified_mentions), color = "gold", size = 1) +
-        geom_line(aes(y = probabilistic_spread), color = "purple", linetype = "dashed") +
-        theme_minimal() +
-        labs(
-          title = "Global Overview of Viral Spread Dynamics",
-          x = "Date",
-          y = "Intensity"
-        )
-      ggplotly(p)
-    })
-  })
-}
-ui <- fluidPage(
-  theme = shinytheme("cosmo"),
-  titlePanel("1+1=1 Meta-Master Viral Spread Dashboard - Ultimate Evolution"),
-  navbarPage(
-    title = "1+1=1 Multi-Layered Synergy",
-    tabPanel("Time Series & Spread", 
-             timeSeriesUI("tsSpread")),
-    tabPanel("3D Ant Colony Network", 
-             network3DUI("net3d")),
-    tabPanel("Fractal Recursion", 
-             fractalUI("fractals")),
-    tabPanel("Multi-Agent System",
-             multiAgentUI("multiAgent")),
-    tabPanel("Bayesian MCMC",
-             mcmcUI("mcmcMod"))
-  )
-)
-server <- function(input, output, session) {
-  data <- generate_synthetic_data("2020-01-01", 1000)
-  timeSeriesServer("tsSpread", data)
-  network3DServer("net3d")
-  fractalServer("fractals")
-  multiAgentServer("multiAgent")
-  sim_data <- simulate_probabilistic_spread(data, spread_prob = 0.05, intervention = 100)
-  mcmcServer("mcmcMod", sim_data)
-}
-shinyApp(ui = ui, server = server)
-
-
 # File: ./chess.R
 --------------------------------------------------------------------------------
 
@@ -1626,846 +1075,6 @@ play_game <- function() {
   print("🏁 Game Over!")
 }
 play_game()
-
-
-# File: ./chronos.R
---------------------------------------------------------------------------------
-
-suppressPackageStartupMessages({
-  library(tidyverse)
-  library(ggplot2)
-  library(gganimate)
-  library(ggforce)
-  library(purrr)
-  library(igraph)
-  library(ambient)
-  library(tidygraph)
-  library(viridis)
-  library(glue)
-  library(gifski)
-})
-GLOBAL_STATE <- new.env()
-create_config <- function(cheatcode = "420691337", n_nodes = 150) {
-  clean_code <- str_replace_all(cheatcode, "[^0-9]", "0")
-  list(
-    cheatcode = cheatcode,
-    n_nodes = n_nodes,
-    time_step = 0.01,
-    influence_factor = 0.05,
-    glitch_probability = 0.003,
-    resonance_params = list(
-      c_4 = as.numeric(str_sub(clean_code, 1, 1)) / 20,
-      c_20 = as.numeric(str_sub(clean_code, 2, 3)) / 2000,
-      c_69 = as.numeric(str_sub(clean_code, 4, 5)) / 200,
-      c_1337 = as.numeric(str_sub(clean_code, 6, 9)) / 20000
-    )
-  )
-}
-animation_save <- function(
-    output_file,
-    frames,
-    fps = 30,
-    width = 800,
-    height = 800,
-    renderer = gifski_renderer(loop = TRUE)
-) {
-  stopifnot(
-    is.character(output_file),
-    is.list(frames),
-    length(frames) > 0,
-    all(sapply(frames, inherits, "ggplot"))
-  )
-  tryCatch({
-    animation <- frames[[1]] +
-      transition_manual(1:length(frames)) +
-      enter_fade() +
-      exit_fade() +
-      ease_aes('linear')
-    anim <- animate(
-      animation,
-      nframes = length(frames),
-      fps = fps,
-      width = width,
-      height = height,
-      renderer = renderer,
-      res = 96,
-      type = "cairo"
-    )
-    anim_save(output_file, anim)
-    invisible(output_file)
-  }, error = function(e) {
-    warning(sprintf("Animation error: %s\nAttempting fallback...", e$message))
-    backup_dir <- file.path(tempdir(), "chronos_frames")
-    dir.create(backup_dir, showWarnings = FALSE, recursive = TRUE)
-    pb <- txtProgressBar(max = length(frames), style = 3)
-    for (i in seq_along(frames)) {
-      tryCatch({
-        ggsave(
-          filename = file.path(backup_dir, sprintf("frame_%04d.png", i)),
-          plot = frames[[i]],
-          width = width/96,
-          height = height/96,
-          dpi = 96
-        )
-        setTxtProgressBar(pb, i)
-      }, error = function(e) {
-        warning(sprintf("Failed to save frame %d: %s", i, e$message))
-      })
-    }
-    close(pb)
-    stop(sprintf(
-      "Animation failed, but saved %d frames to %s",
-      length(list.files(backup_dir)), backup_dir
-    ))
-  })
-}
-create_unified_field <- function(config) {
-  set.seed(as.numeric(str_sub(config$cheatcode, 1, 2)))
-  nodes <- tibble(id = 1:config$n_nodes) %>%
-    mutate(
-      initial_x = ambient::gen_simplex(n()) * cos(ambient::gen_waves(n())),
-      initial_y = ambient::gen_worley(n()) * sin(ambient::gen_spheres(n())),
-      phase = runif(n(), 0, 2 * pi),
-      resonance = runif(n(), 0.8, 1.2)  # Resonance coefficient
-    )
-  graph <- nodes %>%
-    as_tbl_graph() %>%
-    mutate(
-      node_color = viridis(n(), alpha = 0.8),
-      node_size = runif(n(), 2, 5)
-    ) %>%
-    bind_edges(expand_grid(
-      from = 1:config$n_nodes,
-      to = 1:config$n_nodes
-    ) %>%
-      filter(from < to) %>%  # Avoid self-loops and duplicates
-      sample_n(config$n_nodes * 2) %>%  # Control edge density
-      mutate(
-        weight = runif(n(), 0.1, 1.5),
-        edge_phase = runif(n(), 0, 2 * pi)
-      ))
-  return(graph)
-}
-simulate_dynamics <- function(graph, config) {
-  tryCatch({
-    graph <- graph %>%
-      activate(edges) %>%
-      mutate(
-        edge_weight = pmax(0.1, pmin(1.5, weight))  # Clamp weights
-      ) %>%
-      activate(nodes)
-    centrality_data <- graph %>%
-      mutate(
-        eigen_cent = tryCatch(
-          centrality_eigen(weights = edge_weight),
-          error = function(e) rep(0.5, n())  # Stable default
-        ),
-        degree_cent = tryCatch(
-          centrality_degree(normalized = TRUE),
-          error = function(e) rep(0.5, n())
-        ),
-        between_cent = tryCatch(
-          centrality_betweenness(weights = edge_weight, normalized = TRUE),
-          error = function(e) rep(0.5, n())
-        )
-      )
-    updated_graph <- centrality_data %>%
-      activate(nodes) %>%
-      mutate(
-        dx = pmin(0.1, config$influence_factor * sin(phase + eigen_cent * resonance)),
-        dy = pmin(0.1, config$influence_factor * cos(phase + degree_cent * resonance)),
-        initial_x = initial_x + dx * config$time_step,
-        initial_y = initial_y + dy * config$time_step,
-        phase = (phase + config$time_step * (1 + between_cent * resonance)) %% (2 * pi)
-      ) %>%
-      activate(edges) %>%
-      mutate(
-        weight = pmax(0.1, pmin(1.5, weight + config$time_step * sin(edge_phase))),
-        edge_phase = edge_phase %% (2 * pi)
-      )
-    return(updated_graph)
-  }, error = function(e) {
-    warning(glue::glue("Dynamic simulation stabilized: {e$message}"))
-    return(graph)
-  })
-}
-infuse_resonance <- function(graph, config, current_time) {
-  params <- config$resonance_params
-  graph %>%
-    activate(nodes) %>%
-    mutate(
-      node_size = pmax(1, pmin(5, 
-                               node_size * (1 + params$c_4 * sin(current_time * resonance))
-      )),
-      phase = (phase + params$c_20 * 
-                 pmax(0, pmin(1, replace_na(centrality_closeness(), 0.5))) * 
-                 resonance) %% (2 * pi),
-      resonance = pmax(0.8, pmin(1.2, 
-                                 resonance * (1 + params$c_69 * sin(current_time))
-      ))
-    ) %>%
-    activate(edges) %>%
-    mutate(
-      weight = pmax(0.1, pmin(1.5,
-                              weight + params$c_1337 * cos(current_time * edge_phase)
-      ))
-    )
-}
-manifest_glitches <- function(graph, config) {
-  graph %>%
-    activate(nodes) %>%
-    mutate(
-      initial_x = ifelse(
-        runif(n()) < config$glitch_probability,
-        ambient::gen_simplex(n()) * resonance,
-        initial_x
-      ),
-      initial_y = ifelse(
-        runif(n()) < config$glitch_probability,
-        ambient::gen_worley(n()) * resonance,
-        initial_y
-      ),
-      phase = ifelse(
-        runif(n()) < config$glitch_probability,
-        phase + 2 * pi * resonance,
-        phase
-      )
-    )
-}
-visualize_field <- function(graph, frame_num) {
-  layout_coords <- create_layout(graph, layout = "nicely") %>%
-    mutate(
-      x = scale(x, center = TRUE, scale = TRUE),  # Normalize coordinates
-      y = scale(y, center = TRUE, scale = TRUE)
-    )
-  ggraph(layout_coords) +
-    geom_edge_link(
-      aes(
-        alpha = pmin(1, weight),
-        width = pmin(1, weight)
-      ),
-      edge_colour = "lightblue",
-      show.legend = FALSE
-    ) +
-    geom_node_point(
-      aes(
-        size = pmin(8, node_size),
-        fill = node_color,
-        alpha = pmin(1, resonance)
-      ),
-      shape = 21,
-      color = "white",
-      stroke = 0.5
-    ) +
-    scale_edge_width(range = c(0.1, 1), limits = c(0, 1.5)) +
-    scale_size(range = c(2, 8), limits = c(1, 5)) +
-    scale_alpha(range = c(0.2, 0.8), limits = c(0, 1)) +
-    coord_fixed(xlim = c(-2, 2), ylim = c(-2, 2)) +
-    theme_graph(background = "black")
-}
-run_simulation <- function(
-    cheatcode = "420691337",
-    n_nodes = 150,
-    n_frames = 300,
-    output_file = "chronos_unified_field.gif"
-) {
-  config <- create_config(cheatcode, n_nodes)
-  initial_graph <- create_unified_field(config)
-  if (is.null(initial_graph)) {
-    stop("Failed to initialize unified field")
-  }
-  GLOBAL_STATE$current_graph <- initial_graph
-  GLOBAL_STATE$frame_cache <- new.env()
-  message("Generating frames...")
-  frames <- lapply(seq_len(n_frames), function(i) {
-    tryCatch({
-      GLOBAL_STATE$current_graph <- GLOBAL_STATE$current_graph %>%
-        simulate_dynamics(config) %>%
-        infuse_resonance(config, i * 0.1) %>%
-        manifest_glitches(config)
-      frame <- visualize_field(GLOBAL_STATE$current_graph, i)
-      assign(sprintf("frame_%04d", i), frame, envir = GLOBAL_STATE$frame_cache)
-      frame
-    }, error = function(e) {
-      warning(sprintf("Frame %d generation failed: %s", i, e$message))
-      if (exists(sprintf("frame_%04d", max(1, i-1)), envir = GLOBAL_STATE$frame_cache)) {
-        get(sprintf("frame_%04d", max(1, i-1)), envir = GLOBAL_STATE$frame_cache)
-      } else {
-        ggplot() + theme_void() + 
-          labs(title = sprintf("Frame %d (Recovery)", i))
-      }
-    })
-  })
-  message("Rendering animation...")
-  animation_save(
-    output_file = output_file,
-    frames = frames,
-    fps = 30,
-    width = 800,
-    height = 800,
-    renderer = gifski_renderer(loop = TRUE)
-  )
-}
-analyze_field <- function(graph) {
-  centrality <- graph %>%
-    activate(nodes) %>%
-    mutate(
-      degree = centrality_degree(),
-      betweenness = centrality_betweenness(),
-      closeness = centrality_closeness(),
-      eigenvector = centrality_eigen()
-    ) %>%
-    as_tibble()
-  communities <- graph %>%
-    as.igraph() %>%
-    cluster_louvain()
-  list(
-    centrality = centrality,
-    communities = communities
-  )
-}
-animation <- run_simulation(
-  cheatcode = "420691337",
-  n_nodes = 150,
-  n_frames = 300,
-  output_file = "chronos_unified_field.gif"
-)
-s
-results <- analyze_field(GLOBAL_STATE$current_graph)
-cat("\n--- Unified Field Analysis ---\n")
-cat("\nCentrality Measures Summary:\n")
-print(summary(results$centrality))
-cat("\nCommunity Structure:\n")
-print(results$communities)
-analyze_centrality <- function(graph, temporal_window = 10) {
-  base_metrics <- graph %>%
-    activate(nodes) %>%
-    mutate(
-      degree = centrality_degree(normalized = TRUE),
-      betweenness = centrality_betweenness(normalized = TRUE),
-      closeness = centrality_closeness(normalized = TRUE),
-      eigenvector = centrality_eigen(scale = TRUE),
-      page_rank = centrality_pagerank(damping = 0.85),
-      authority = authority_score()$vector,
-      hub = hub_score()$vector,
-      influence_score = (eigenvector + page_rank + authority) / 3,
-      resonance_amplitude = abs(node_size * influence_score),
-      phase_coherence = cos(phase) * resonance
-    ) %>%
-    as_tibble()
-  if (!is.null(GLOBAL_STATE$historical_metrics)) {
-    temporal_metrics <- analyze_temporal_stability(base_metrics, temporal_window)
-    base_metrics <- bind_cols(base_metrics, temporal_metrics)
-  }
-  base_metrics
-}
-analyze_communities <- function(graph) {
-  communities <- list(
-    louvain = cluster_louvain(graph %>% as.igraph()),
-    infomap = cluster_infomap(graph %>% as.igraph()),
-    walktrap = cluster_walktrap(graph %>% as.igraph())
-  )
-  consensus <- create_consensus_clustering(communities)
-  stability <- compute_clustering_stability(communities)
-  list(
-    communities = communities,
-    consensus = consensus,
-    stability = stability,
-    modularity = calculate_modularity(graph, consensus)
-  )
-}
-analyze_patterns <- function(graph, config) {
-  dynamics <- graph %>%
-    activate(nodes) %>%
-    as_tibble() %>%
-    select(initial_x, initial_y, phase, resonance)
-  patterns <- list(
-    spatial = analyze_spatial_patterns(dynamics),
-    coherence = analyze_phase_coherence(dynamics),
-    resonance = analyze_resonance_patterns(dynamics, config)
-  )
-  emergence <- detect_emergent_structures(patterns)
-  list(
-    patterns = patterns,
-    emergence = emergence,
-    complexity = compute_complexity_metrics(patterns)
-  )
-}
-run_meta_analysis <- function(graph, config) {
-  centrality <- analyze_centrality(graph)
-  communities <- analyze_communities(graph)
-  patterns <- analyze_patterns(graph, config)
-  insights <- generate_field_insights(centrality, communities, patterns)
-  list(
-    metrics = list(
-      centrality = centrality,
-      communities = communities,
-      patterns = patterns
-    ),
-    insights = insights
-  )
-}
-generate_field_insights <- function(centrality, communities, patterns) {
-  metrics_summary <- summarize_metrics(centrality, patterns)
-  community_insights <- analyze_community_structure(communities)
-  emergence_insights <- analyze_emergence(patterns)
-  cat("\n=== Unified Field Analysis Insights ===\n")
-  cat("\n1. Field Cohesion Metrics:\n")
-  cat(sprintf("- Global Coherence: %.3f\n", metrics_summary$global_coherence))
-  cat(sprintf("- Pattern Stability: %.3f\n", metrics_summary$pattern_stability))
-  cat(sprintf("- Resonance Strength: %.3f\n", metrics_summary$resonance_strength))
-  cat("\n2. Community Structure:\n")
-  cat(sprintf("- Number of Stable Communities: %d\n", community_insights$stable_count))
-  cat(sprintf("- Modularity Score: %.3f\n", community_insights$modularity))
-  cat(sprintf("- Inter-community Coupling: %.3f\n", community_insights$coupling))
-  cat("\n3. Emergent Properties:\n")
-  cat("- ", emergence_insights$primary_pattern, "\n")
-  cat("- ", emergence_insights$secondary_patterns, "\n")
-  cat(sprintf("- Emergence Strength: %.3f\n", emergence_insights$strength))
-  cat("\n4. Unity Manifestation (1+1=1):\n")
-  cat("- Individual nodes maintain distinct identity while participating in collective behavior\n")
-  cat("- Field demonstrates emergent properties transcending individual components\n")
-  cat("- Glitch patterns reveal deeper underlying unity through apparent chaos\n")
-  cat("- Phase coherence indicates field-wide resonance and harmony\n")
-  cat("- Community structure shows nested levels of unity at multiple scales\n")
-  invisible(list(
-    metrics_summary = metrics_summary,
-    community_insights = community_insights,
-    emergence_insights = emergence_insights
-  ))
-}
-results <- run_meta_analysis(GLOBAL_STATE$current_graph, config)
-print(results$insights)
-
-
-# File: ./chronos_2.R
---------------------------------------------------------------------------------
-
-library(shiny)
-library(shinythemes)
-library(tidyverse)
-library(ggplot2)
-library(gganimate)
-library(tidygraph)
-library(ggraph)
-library(magick)    # For certain gganimate transitions if needed
-library(igraph)    # Underpinning of tidygraph
-library(scales)    # For color scaling
-library(plotly)    # Optional for 3D or interactive expansions (unused but available)
-phi <- (1 + sqrt(5)) / 2  # Golden Ratio ϕ ~ 1.6180339887
-cheatcode <- 420691337    # The sacred seed of order & chaos
-set.seed(cheatcode)
-options(scipen = 999)       # Avoid scientific notation
-theme_set(theme_minimal())  # Global ggplot theme
-ui <- fluidPage(
-theme = shinytheme("cyborg"),  # A futuristic theme
-titlePanel("Chronos: The Singularity Engine (v3.0)"),
-sidebarLayout(
-  sidebarPanel(
-    h3("Control Panel"),
-    sliderInput(
-      inputId = "nodeCount",
-      label = "Number of Nodes (Individual Entities)",
-      min = 10,
-      max = 300,
-      value = 50,
-      step = 5
-    ),
-    sliderInput(
-      inputId = "edgeFactor",
-      label = "Edge Density Factor",
-      min = 0.1,
-      max = 5,
-      value = 1,
-      step = 0.1
-    ),
-    sliderInput(
-      inputId = "glitchProbability",
-      label = "Glitch Probability per Iteration (%)",
-      min = 0,
-      max = 100,
-      value = 10,
-      step = 5
-    ),
-    sliderInput(
-      inputId = "cheatcodeIntensity",
-      label = "Cheatcode (420691337) Influence",
-      min = 0,
-      max = 1,
-      value = 0.5,
-      step = 0.01
-    ),
-    sliderInput(
-      inputId = "timeStep",
-      label = "Time Interval (seconds per iteration)",
-      min = 0.1,
-      max = 3,
-      value = 1,
-      step = 0.1
-    ),
-    sliderInput(
-      inputId = "timeDilation",
-      label = "Time Dilation Factor (Relativity Effect)",
-      min = 0.1,
-      max = 5,
-      value = 1,
-      step = 0.1
-    ),
-    tags$hr(),
-    h4("Philosophical Tuning"),
-    checkboxInput(
-      inputId = "enableMonism",
-      label = "Embody 1+1=1 principle in color/fusion?",
-      value = TRUE
-    ),
-    checkboxInput(
-      inputId = "enableFibonacciGlitches",
-      label = "Fibonacci-Driven Glitch Pulses?",
-      value = TRUE
-    ),
-    tags$hr(),
-    actionButton(
-      inputId = "spawnGraph",
-      label = "Spawn / Reset Network",
-      icon = icon("redo")
-    ),
-    actionButton(
-      inputId = "updateGraph",
-      label = "Advance One Iteration",
-      icon = icon("play-circle")
-    ),
-    actionButton(
-      inputId = "autoRun",
-      label = "Auto-Run Toggle",
-      icon = icon("infinity")
-    ),
-    br(),
-    tags$small("Chaos & Order converge. The glitch is the cheatcode. The cheatcode is the glitch.")
-  ),
-  mainPanel(
-    tabsetPanel(
-      tabPanel(
-        "Live Visualization",
-        plotOutput("networkPlot", height = "600px"),
-        br(),
-        h4("System Logs:"),
-        verbatimTextOutput("systemLog")
-      ),
-      tabPanel(
-        "Animated Playback",
-        h5("When the network converges, we can watch the entire emergent timeline."),
-        imageOutput("ggAnimOutput")
-      ),
-      tabPanel(
-        "About",
-        fluidRow(
-          column(
-            width = 12,
-            h3("Chronos: The Singularity Engine"),
-            p("A fractal, emergent, glitch-infused artifact from 2069, 
-              bridging the ephemeral gap to 2025. 
-              Experience the interplay of Fibonacci geometry, 
-              golden ratio harmonics, and chaotic cheatcode disruptions."),
-            tags$ul(
-              tags$li("Artistic Awe: A cosmic dance of colors and forms"),
-              tags$li("Mathematical Depth: Nonlinear dynamics, fractal recursion, graph theory"),
-              tags$li("Philosophical Unity: 1+1=1 as a living axiom"),
-              tags$li("Temporal Transcendence: A metagaming invocation from 2069 to 2025")
-            )
-          )
-        )
-      )
-    )
-  )
-)
-)
-server <- function(input, output, session) {
-rv <- reactiveValues(
-  iteration = 0,
-  graph = NULL,
-  logs = character(),
-  frames = list(),     # We'll keep snapshots for gganimate
-  autoRunning = FALSE
-)
-chronosLog <- function(message) {
-  timeStamp <- format(Sys.time(), "%H:%M:%S")
-  newMsg <- paste0("[", timeStamp, "] ", message)
-  rv$logs <- c(rv$logs, newMsg)
-}
-fibSequence <- reactive({
-  fib <- c(1,1)
-  while (tail(fib, 1) < 1000) {
-    fib <- c(fib, sum(tail(fib, 2)))
-  }
-  fib
-})
-generatePhyllotaxis <- function(n) {
-  c <- 2.5  # scale factor for spacing
-  angles <- seq_len(n) * 2 * pi / phi^2  # golden ratio-based angle
-  r <- c * sqrt(seq_len(n))
-  tibble(
-    id = seq_len(n),
-    x = r * cos(angles),
-    y = r * sin(angles)
-  )
-}
-createDynamicGraph <- function(numNodes = 50, edgeFactor = 1) {
-  layoutDF <- generatePhyllotaxis(numNodes)
-  g <- make_empty_graph(n = numNodes, directed = FALSE) %>%
-    as_tbl_graph() %>%
-    mutate(
-      id = 1:n(),                    # Node IDs
-      xcoord = layoutDF$x,           # X coordinates
-      ycoord = layoutDF$y,           # Y coordinates
-      size = 2,                      # Default size
-      color = "#FFFFFF",             # Default color
-      phase = runif(n(), 0, 2 * pi), # Random phase for dynamic updates
-      freq = phi * 0.1               # Frequency (based on golden ratio)
-    )
-  coords <- matrix(c(layoutDF$x, layoutDF$y), ncol = 2)
-  k <- max(round(edgeFactor * 2), 1)
-  edges <- lapply(1:numNodes, function(i) {
-    distances <- sqrt(colSums((t(coords) - coords[i, ])^2))
-    distances[i] <- Inf
-    neighbors <- order(distances)[1:k]
-    tibble(from = i, to = neighbors)
-  }) %>% bind_rows()
-  g <- g %>% bind_edges(edges)
-  return(g)
-}
-applyGlitch <- function(tg) {
-  if (is.null(tg)) return(tg)
-  nodeCount <- gorder(tg)
-  pHit <- 0.2
-  glitchNodes <- sample(nodeCount, size = max(1, round(pHit * nodeCount)))
-  tg <- tg %>%
-    mutate(
-      xcoord = ifelse(row_number() %in% glitchNodes, xcoord + runif(1, -0.1, 0.1), xcoord),
-      ycoord = ifelse(row_number() %in% glitchNodes, ycoord + runif(1, -0.1, 0.1), ycoord),
-      color = ifelse(row_number() %in% glitchNodes, hsv(runif(1), 1, 1), color),
-      size = ifelse(is.na(size), 2, size) # Ensure size exists
-    )
-  edge_df <- tg %>% activate(edges) %>% as_tibble()
-  if (nrow(edge_df) > 0) {
-    removeCount <- round(0.2 * nrow(edge_df))
-    if (removeCount > 0) {
-      edgesToRemove <- sample(nrow(edge_df), removeCount)
-      tg <- tg %>% activate(edges) %>% slice(-edgesToRemove)
-    }
-  }
-  addCount <- round(runif(1, 0, 0.2) * nodeCount)
-  if (addCount > 0 && length(glitchNodes) > 1) {
-    new_edges <- expand.grid(from = glitchNodes, to = glitchNodes) %>%
-      filter(from < to) %>%
-      sample_n(min(addCount, n()))
-    tg <- tg %>% bind_edges(new_edges)
-  }
-  return(tg)
-}
-applyCheatcode <- function(tg, intensity = 0.5) {
-  if (is.null(tg)) return(tg)
-  if (cheatcode == 420691337) {
-    chronosLog("You've unlocked the secret of the universe. 1+1=1.")
-    tg <- tg %>%
-      activate(nodes) %>%
-      mutate(
-        size = replace_na(.data$size, 2) * phi,
-        color = "gold"
-      )
-  }
-  idealCoords <- generatePhyllotaxis(gorder(tg))
-  tg <- tg %>%
-    activate(nodes) %>%
-    mutate(
-      xcoord = .data$xcoord + intensity * (idealCoords$x - .data$xcoord),
-      ycoord = .data$ycoord + intensity * (idealCoords$y - .data$ycoord),
-      color = map_chr(.data$color, ~ {
-        col_rgb <- col2rgb(.x) / 255
-        target_rgb <- col2rgb("#00FFFF") / 255 
-        blended <- col_rgb + intensity * (target_rgb - col_rgb)
-        rgb(blended[1], blended[2], blended[3])
-      })
-    )
-  return(tg)
-}
-updateGraphIteration <- function() {
-  req(rv$graph)  # Validate graph existence
-  rv$iteration <- rv$iteration + 1
-  iterationNow <- rv$iteration
-  glitchP <- input$glitchProbability / 100
-  glitchP <- glitchP * sqrt(iterationNow %% phi)
-  isGlitch <- runif(1) < glitchP
-  if (input$enableFibonacciGlitches) {
-    fibs <- fibSequence()
-    isGlitch <- isGlitch || (iterationNow %in% fibs)
-  }
-  if (isGlitch) {
-    chronosLog(paste0("Glitch triggered at iteration ", iterationNow))
-    rv$graph <- applyGlitch(rv$graph)
-  }
-  if (input$cheatcodeIntensity > 0) {
-    intensityValue <- min(input$cheatcodeIntensity + rv$iteration * 0.001, 1)
-    rv$graph <- applyCheatcode(rv$graph, intensityValue)
-  }
-  graph_state <- rv$graph
-  newColors <- map_chr(seq_len(gorder(graph_state)), function(i) {
-    current_node <- graph_state %>%
-      activate(nodes) %>%
-      slice(i)
-    phaseVal <- rv$iteration * (current_node$freq %||% (phi * 0.1))
-    if (input$enableMonism) {
-      h <- (phaseVal / (2*pi)) %% 1
-      return(hsv(h, 1, 1))
-    } else {
-      oldColor <- current_node$color %||% "#FFFFFF"
-      colHSV <- rgb2hsv(col2rgb(oldColor))
-      newH <- (colHSV[1] + 0.01) %% 1
-      return(hsv(newH, colHSV[2], colHSV[3]))
-    }
-  })
-  rv$graph <- rv$graph %>%
-    activate(nodes) %>%
-    mutate(color = newColors)
-  snapshot <- rv$graph %>%
-    activate(nodes) %>%
-    as_tibble() %>%
-    mutate(iteration = iterationNow)
-  edgesnap <- rv$graph %>%
-    activate(edges) %>%
-    as_tibble() %>%
-    mutate(iteration = iterationNow)
-  rv$frames[[length(rv$frames) + 1]] <- list(
-    nodes = snapshot,
-    edges = edgesnap
-  )
-}
-observe({
-  invalidateLater(log(1 + input$timeDilation) * input$timeStep * 1000, session)
-  if (rv$autoRunning) {
-    updateGraphIteration()
-  }
-})
-observeEvent(input$spawnGraph, {
-  chronosLog("Spawning new dynamic graph based on current settings...")
-  rv$iteration <- 0
-  rv$frames <- list()
-  rv$graph <- createDynamicGraph(
-    numNodes = input$nodeCount,
-    edgeFactor = input$edgeFactor
-  )
-  chronosLog("Graph spawned. Iteration set to 0.")
-})
-observeEvent(input$updateGraph, {
-  if (is.null(rv$graph)) {
-    showNotification("No graph present. Please spawn/reset the graph first.")
-    return()
-  }
-  updateGraphIteration()
-})
-observeEvent(input$autoRun, {
-  rv$autoRunning <- !rv$autoRunning
-  if (rv$autoRunning) {
-    chronosLog("Auto-run toggled ON. Iterations will update automatically.")
-  } else {
-    chronosLog("Auto-run toggled OFF.")
-  }
-})
-output$systemLog <- renderText({
-  if (length(rv$logs) == 0) return("No system logs yet...")
-  paste(rv$logs, collapse = "\n")
-})
-output$networkPlot <- renderPlot({
-  req(rv$graph)
-  g <- rv$graph
-  node_data <- g %>%
-    activate(nodes) %>%
-    as_tibble() %>%
-    mutate(
-      id = row_number(),
-      size = replace_na(.data$size, 2),
-      color = replace_na(.data$color, "#FFFFFF")
-    )
-  edge_data <- g %>%
-    activate(edges) %>%
-    as_tibble() %>%
-    left_join(node_data %>% select(id, xcoord, ycoord), 
-              by = c("from" = "id")) %>%
-    rename(x1 = xcoord, y1 = ycoord) %>%
-    left_join(node_data %>% select(id, xcoord, ycoord), 
-              by = c("to" = "id")) %>%
-    rename(x2 = xcoord, y2 = ycoord)
-  ggplot() +
-    geom_segment(data = edge_data, 
-                 aes(x = x1, y = y1, xend = x2, yend = y2),
-                 color = "white", alpha = 0.4) +
-    geom_point(data = node_data, 
-               aes(x = xcoord, y = ycoord, 
-                   color = color, size = size)) +
-    scale_color_identity() +
-    coord_fixed() +
-    theme_void() +
-    theme(
-      plot.background = element_rect(fill = "black", color = NA),
-      panel.background = element_rect(fill = "black", color = NA),
-      legend.position = "none"
-    )
-})
-output$ggAnimOutput <- renderImage({
-  if (length(rv$frames) < 2) {
-    return(list(src = "", contentType = "text/html", alt = "No frames available"))
-  }
-  tmpFile <- tempfile(fileext = ".gif")
-  bigNodeDF <- map_dfr(rv$frames, ~ .x$nodes)
-  bigEdgeDF <- map_dfr(rv$frames, ~ .x$edges)
-  animPlot <- ggplot() +
-    geom_segment(
-      data = bigEdgeDF,
-      aes(
-        x = .data$xcoord[from],
-        y = .data$ycoord[from],
-        xend = .data$xcoord[to],
-        yend = .data$ycoord[to],
-        group = interaction(from, to, iteration)
-      ),
-      color = "white", alpha = 0.4
-    ) +
-    geom_point(
-      data = bigNodeDF,
-      aes(
-        x = xcoord,
-        y = ycoord,
-        color = I(color),
-        group = id,
-        size = I(size)
-      )
-    ) +
-    coord_fixed() +
-    theme_void() +
-    theme(
-      plot.background = element_rect(fill = "black", color = NA),
-      panel.background = element_rect(fill = "black", color = NA)
-    ) +
-    transition_states(iteration, transition_length = 2, state_length = 1) +
-    ggtitle("Chronos: The Singularity Engine", subtitle = "Iteration: {closest_state}")
-  animSave <- animate(
-    animPlot, 
-    duration = max(5, length(unique(bigNodeDF$iteration)) * 0.5),
-    fps = 10,
-    width = 600,
-    height = 600,
-    renderer = gifski_renderer(loop = TRUE)
-  )
-  anim_save(tmpFile, animation = animSave)
-  list(
-    src = tmpFile,
-    contentType = "image/gif",
-    alt = "Animated Chronos Visualization"
-  )
-}, deleteFile = TRUE)
-}
-if (interactive()) {
-shinyApp(ui, server)
-}
 
 
 # File: ./collate_code.R
@@ -4818,6 +3427,678 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 
 
+# File: ./dashboards/matrix_evolved.R
+--------------------------------------------------------------------------------
+
+library(shiny)
+library(shinydashboard)
+library(plotly)
+library(shinyjs)
+library(htmltools)
+library(httr)
+library(jsonlite)
+library(R6)
+library(gganimate)
+matrix_css <- HTML("
+body, .content-wrapper, .main-sidebar, .sidebar {
+  background-color: #000000 !important; 
+  color: #00ff00 !important; 
+  font-family: 'Courier New', monospace; 
+}
+h1, h2, h3, h4, h5, h6, p, label, .box-title, .sidebar-menu li a {
+  color: #00ff00 !important;
+}
+.info-box {
+  background: rgba(0,0,0,0.8) !important;
+  color: #00ff00 !important;
+}
+.sidebar-menu > li.active > a,
+.sidebar-menu > li:hover > a {
+  background-color: #003300 !important;
+  color: #00ff00 !important;
+}
+.box {
+  background: rgba(0,0,0,0.8)!important;
+  border: 1px solid #00ff00 !important;
+}
+.navbar, .main-header .logo {
+  background-color: #000000 !important;
+  border-bottom: 1px solid #00ff00 !important;
+}
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  overflow: hidden;
+  z-index: -1; 
+}
+")
+matrix_rain_script <- HTML("
+<script>
+var c = document.createElement('canvas');
+c.setAttribute('id', 'canvas');
+document.body.appendChild(c);
+var ctx = c.getContext('2d');
+c.height = window.innerHeight;
+c.width = window.innerWidth;
+var matrix = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+';
+matrix = matrix.split('');
+var font_size = 16;
+var columns = c.width/font_size;
+var drops = [];
+for(var x = 0; x < columns; x++)
+  drops[x] = 1; 
+function draw() {
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle = '#00FF00';
+  ctx.font = font_size + 'px monospace';
+  for(var i = 0; i < drops.length; i++) {
+    var text = matrix[Math.floor(Math.random()*matrix.length)];
+    ctx.fillText(text,i*font_size,drops[i]*font_size);
+    if(drops[i]*font_size > c.height && Math.random() > 0.975)
+      drops[i] = 0;
+    drops[i]++;
+  }
+}
+setInterval(draw,35);
+</script>
+")
+QuantumConsciousness <- R6::R6Class("QuantumConsciousness",
+                                    public = list(
+                                      duality_param = 0.5,
+                                      vibration_level = 0.5,
+                                      enlightenment = 0,
+                                      initialize = function() {
+                                        self$duality_param <- 0.5
+                                        self$vibration_level <- 0.5
+                                        self$enlightenment <- 0
+                                      },
+                                      update_state = function(duality, vibration) {
+                                        self$duality_param <- duality
+                                        self$vibration_level <- vibration
+                                        self$enlightenment <- round((1 - abs(0.5 - duality)*2) * vibration * 100)
+                                      },
+                                      generate_fractal_data = function() {
+                                        theta <- seq(0, 2*pi, length.out=50)
+                                        phi <- seq(0, pi, length.out=50)
+                                        df <- expand.grid(theta=theta, phi=phi)
+                                        r <- 1 + 0.5*sin(df$theta*3)*cos(df$phi*3)*self$duality_param*self$vibration_level
+                                        x <- r*sin(df$phi)*cos(df$theta)
+                                        y <- r*sin(df$phi)*sin(df$theta)
+                                        z <- r*cos(df$phi)
+                                        data.frame(x=x, y=y, z=z)
+                                      },
+                                      generate_network_data = function() {
+                                        n <- 20
+                                        nodes <- data.frame(id=1:n, group=ifelse(runif(n)>self$duality_param, 1, 2))
+                                        edges <- expand.grid(from=1:n, to=1:n)
+                                        edges <- edges[edges$from<edges$to,]
+                                        edges$weight <- runif(nrow(edges))*self$vibration_level
+                                        list(nodes=nodes, edges=edges)
+                                      },
+                                      generate_chrysalis_data = function() {
+                                        u <- seq(-1,1,length.out=50)
+                                        v <- seq(-1,1,length.out=50)
+                                        df <- expand.grid(u=u,v=v)
+                                        wing1 <- (1-self$duality_param)*((df$u^2 + df$v^2) < 0.5)
+                                        wing2 <- self$duality_param*((df$u^2 + df$v^2) < 0.5)
+                                        z <- df$u^2 + df$v^2
+                                        x <- df$u * (wing1 + wing2)
+                                        y <- df$v * (wing1 + wing2)
+                                        data.frame(x=x, y=y, z=z)
+                                      }
+                                    )
+)
+visualize_quantum_unity <- function(resolution = 100, steps = 50) {
+  field <- expand.grid(
+    x = seq(-pi, pi, length.out = resolution),
+    y = seq(-pi, pi, length.out = resolution),
+    t = seq(0, 2*pi, length.out = steps)
+  )
+  field <- field %>%
+    mutate(
+      psi1 = sin(x * cos(t)),
+      psi2 = cos(y * sin(t)),
+      unity = (psi1^2 + psi2^2) * exp(-psi1 * psi2 * t),
+      alpha = (unity - min(unity)) / (max(unity) - min(unity))
+    )
+  animation <- ggplot(field, aes(x, y, fill = unity, frame = t)) +
+    geom_tile(alpha = 0.9) +
+    scale_fill_viridis_c() +
+    labs(
+      title = "Quantum Unity Field: 1+1=1",
+      subtitle = "Evolving coherence through quantum harmony",
+      x = "ψ-axis",
+      y = "φ-axis"
+    ) +
+    theme_minimal() +
+    theme(
+      text = element_text(color = "white"),
+      plot.background = element_rect(fill = "black"),
+      panel.grid = element_line(color = "gray30"),
+      plot.title = element_text(hjust = 0.5, size = 18),
+      plot.subtitle = element_text(hjust = 0.5)
+    ) +
+    transition_time(t) +
+    ease_aes('cubic-in-out')
+  animate(animation, nframes = steps, fps = 10, width = 800, height = 800)
+}
+generate_unity_network <- function(nodes = 15, frames = 50) {
+  network <- expand.grid(
+    time = seq(1, frames),
+    node1 = seq(1, nodes),
+    node2 = seq(1, nodes)
+  ) %>%
+    filter(node1 < node2) %>%
+    mutate(
+      connection_strength = exp(-abs(node1 - node2) / time),
+      x1 = cos(2 * pi * node1 / nodes + time / 10),
+      y1 = sin(2 * pi * node1 / nodes + time / 10),
+      x2 = cos(2 * pi * node2 / nodes + time / 10),
+      y2 = sin(2 * pi * node2 / nodes + time / 10)
+    )
+  ggplot(network, aes(frame = time)) +
+    geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2, alpha = connection_strength),
+                 color = "#61FF7E") +
+    theme_void() +
+    coord_fixed() +
+    labs(title = "Unity Network Evolution") +
+    transition_time(time) +
+    ease_aes("sine-in-out")
+}
+visualize_golden_spiral <- function(resolution = 300) {
+  theta <- seq(0, 2 * pi * resolution / 100, length.out = resolution)
+  r <- theta^(1/PHI)
+  spiral <- tibble(
+    x = r * cos(theta),
+    y = r * sin(theta),
+    color = theta %% (2 * pi)
+  )
+  ggplot(spiral, aes(x, y, color = color)) +
+    geom_point(size = 0.8, alpha = 0.7) +
+    scale_color_viridis_c(option = "inferno") +
+    labs(
+      title = "Golden Unity Spiral",
+      subtitle = "Emergence through harmonic convergence"
+    ) +
+    theme_void()
+}
+generate_holographic_field <- function(resolution = 100, frames = 50) {
+  field <- expand.grid(
+    x = seq(-1, 1, length.out = resolution),
+    y = seq(-1, 1, length.out = resolution),
+    time = seq(0, 2 * pi, length.out = frames)
+  )
+  field <- field %>%
+    mutate(
+      z = cos(2 * pi * sqrt(x^2 + y^2) - time),
+      color = sin(2 * pi * sqrt(x^2 + y^2) - time),
+      alpha = (z + 1) / 2
+    )
+  ggplot(field, aes(x, y, fill = color, alpha = alpha)) +
+    geom_tile() +
+    scale_fill_gradientn(colors = c("#000000", "#FF00FF", "#00FFFF", "#00FF00")) +
+    coord_fixed() +
+    labs(
+      title = "Holographic Quantum Field",
+      subtitle = "Unity in Evolution",
+      x = "ψ-Dimension",
+      y = "φ-Dimension"
+    ) +
+    theme_void() +
+    theme(
+      plot.background = element_rect(fill = "#000000"),
+      text = element_text(color = "#FFFFFF")
+    ) +
+    transition_time(time) +
+    ease_aes('sine-in-out')
+}
+generate_recursive_meta_field <- function(depth = 5, points = 100) {
+  phi <- (1 + sqrt(5)) / 2
+  field <- tibble(
+    x = cos(seq(0, 2 * pi, length.out = points)),
+    y = sin(seq(0, 2 * pi, length.out = points))
+  )
+  for (i in seq_len(depth)) {
+    field <- field %>%
+      mutate(
+        x = x / phi + cos(seq(0, 2 * pi, length.out = points * i)) / i,
+        y = y / phi + sin(seq(0, 2 * pi, length.out = points * i)) / i
+      )
+  }
+  ggplot(field, aes(x, y)) +
+    geom_path(color = "#FF00FF", alpha = 0.7, size = 0.7) +
+    coord_fixed() +
+    labs(
+      title = "Recursive Unity Meta-Field",
+      subtitle = "Fractal Harmony of 1+1=1"
+    ) +
+    theme_void() +
+    theme(
+      plot.background = element_rect(fill = "#000000"),
+      text = element_text(color = "#FFFFFF")
+    )
+}
+generate_self_evolving_matrix <- function(nodes = 30, frames = 100) {
+  evolution <- expand.grid(
+    node = seq(1, nodes),
+    frame = seq(1, frames)
+  )
+  evolution <- evolution %>%
+    mutate(
+      x = cos(2 * pi * node / nodes + frame / 10),
+      y = sin(2 * pi * node / nodes + frame / 10),
+      size = abs(cos(frame / 10)) * runif(nodes),
+      alpha = (size - min(size)) / (max(size) - min(size))
+    )
+  ggplot(evolution, aes(x, y, size = size, alpha = alpha)) +
+    geom_point(color = "#00FF00") +
+    scale_size_continuous(range = c(1, 5)) +
+    coord_fixed() +
+    labs(
+      title = "Self-Evolving Matrix",
+      subtitle = "Nodes Converging into Unity"
+    ) +
+    theme_void() +
+    transition_time(frame) +
+    ease_aes("cubic-in-out")
+}
+query_gpt <- function(prompt) {
+  paste0("Reflecting on '", prompt, "': The notion that 1+1=1 dissolves boundaries, ",
+         "revealing that separations may be illusions. By tuning duality and vibration, ",
+         "you transform perception: what seemed distinct becomes unified, echoing the deeper truth.")
+}
+ui <- dashboardPage(
+  skin = "black",
+  dashboardHeader(title = span("Unity Matrix Interface", style = "color: #00ff00;")),
+  dashboardSidebar(
+    sidebarMenu(
+      id = "sidebar",
+      menuItem("Metaphysical Journey", tabName = "metaphysics", icon = icon("yin-yang")),
+      menuItem("Quantum Animation", tabName = "quantum", icon = icon("atom")),
+      menuItem("Golden Spiral", tabName = "spiral", icon = icon("circle")),
+      menuItem("Unity Network", tabName = "network", icon = icon("project-diagram")),
+      menuItem("Philosophical Console", tabName = "philosophy", icon = icon("comments")),
+      menuItem("Break the Matrix", tabName = "break", icon = icon("bolt"))
+    )
+  ),
+  dashboardBody(
+    tags$head(
+      tags$style(HTML("
+        body, .content-wrapper, .main-sidebar, .sidebar {
+          background-color: #000000 !important;
+          color: #00ff00 !important;
+          font-family: 'Courier New', monospace;
+        }
+        .box {
+          background: rgba(0,0,0,0.8) !important;
+          border: 1px solid #00ff00 !important;
+        }
+        .nav-tabs-custom > .tab-content {
+          background: #000000;
+        }
+        .form-control {
+          background-color: #001100 !important;
+          color: #00ff00 !important;
+          border: 1px solid #00ff00;
+        }
+        .slider-container {
+          padding: 15px;
+        }
+      ")),
+      tags$script(HTML("
+        // Matrix rain effect
+        document.addEventListener('DOMContentLoaded', function() {
+          const canvas = document.createElement('canvas');
+          canvas.style.position = 'fixed';
+          canvas.style.top = '0';
+          canvas.style.left = '0';
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+          canvas.style.zIndex = '-1';
+          document.body.appendChild(canvas);
+          const ctx = canvas.getContext('2d');
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          const matrix = '01';
+          const drops = Array(Math.ceil(canvas.width/20)).fill(1);
+          function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = '20px monospace';
+            for(let i = 0; i < drops.length; i++) {
+              const text = matrix[Math.floor(Math.random() * matrix.length)];
+              ctx.fillText(text, i * 20, drops[i] * 20);
+              if(drops[i] * 20 > canvas.height && Math.random() > 0.975)
+                drops[i] = 0;
+              drops[i]++;
+            }
+          }
+          setInterval(draw, 35);
+        });
+      "))
+    ),
+    useShinyjs(),
+    tabItems(
+      tabItem(tabName = "metaphysics",
+              fluidRow(
+                box(title = "1+1=1 Fractal", width = 4, solidHeader = TRUE,
+                    plotlyOutput("fractal", height = "300px")
+                ),
+                box(title = "Unity Network", width = 4, solidHeader = TRUE,
+                    plotlyOutput("network", height = "300px")
+                ),
+                box(title = "Cosmic Chrysalis", width = 4, solidHeader = TRUE,
+                    plotlyOutput("chrysalis", height = "300px")
+                )
+              ),
+              fluidRow(
+                box(width = 12,
+                    column(6,
+                           sliderInput("duality", "Duality-to-Unity Axis",
+                                       min = 0, max = 1, value = 0.5, step = 0.01)
+                    ),
+                    column(6,
+                           sliderInput("vibration", "Vibration Level",
+                                       min = 0, max = 1, value = 0.5, step = 0.01)
+                    ),
+                    hr(),
+                    div(class = "text-center",
+                        h4("Enlightenment Index:", style = "color: #00ff00"),
+                        textOutput("enlightenmentValue", inline = TRUE)
+                    )
+                )
+              )
+      ),
+      tabItem(tabName = "quantum",
+              box(width = 12,
+                  plotOutput("quantumField", height = "600px")
+              )
+      ),
+      tabItem(tabName = "spiral",
+              box(width = 12,
+                  plotOutput("goldenSpiral", height = "600px")
+              )
+      ),
+      tabItem(tabName = "network",
+              box(width = 12,
+                  plotlyOutput("unityNetwork", height = "600px")
+              )
+      ),
+      tabItem(tabName = "philosophy",
+              box(width = 12,
+                  textAreaInput("userQuery", "Ask a Metaphysical Question:",
+                                placeholder = "Why does 1+1=1?", width = "100%",
+                                height = "100px"),
+                  actionButton("askQuery", "Reflect", 
+                               class = "btn-success"),
+                  hr(),
+                  div(id = "philosophicalConsole",
+                      style = "max-height: 500px; overflow-y: auto;",
+                      uiOutput("philosophy"))
+              )
+      ),
+      tabItem(tabName = "break",
+              box(width = 12,
+                  actionButton("breakMatrix", "Break the Matrix",
+                               class = "btn-danger btn-lg"),
+                  hr(),
+                  uiOutput("matrixStatus")
+              )
+      )
+    )
+  )
+)
+server <- function(input, output, session) {
+  consciousness <- QuantumConsciousness$new()
+  rv <- reactiveValues(
+    enlightenment = 0,
+    queries = 0,
+    matrix_broken = FALSE
+  )
+  observe({
+    consciousness$update_state(input$duality, input$vibration)
+    rv$enlightenment <- consciousness$enlightenment
+  })
+  output$fractal <- renderPlotly({
+    req(input$duality, input$vibration)
+    df <- consciousness$generate_fractal_data()
+    plot_ly(df, x = ~x, y = ~y, z = ~z,
+            type = "scatter3d", mode = "markers",
+            marker = list(
+              size = 2,
+              color = df$z,
+              colorscale = list(c(0,'#001100'), c(1,'#00ff00'))
+            )) %>%
+      layout(
+        scene = list(
+          bgcolor = "#000000",
+          xaxis = list(gridcolor = "#003300", zerolinecolor = "#003300"),
+          yaxis = list(gridcolor = "#003300", zerolinecolor = "#003300"),
+          zaxis = list(gridcolor = "#003300", zerolinecolor = "#003300")
+        ),
+        paper_bgcolor = "#000000",
+        plot_bgcolor = "#000000"
+      )
+  })
+  output$quantumField <- renderPlotly({
+    resolution <- 50
+    steps <- 30
+    grid <- expand.grid(
+      x = seq(-pi, pi, length.out = resolution),
+      y = seq(-pi, pi, length.out = resolution)
+    )
+    frames <- lapply(seq(0, 2*pi, length.out = steps), function(t) {
+      grid %>%
+        mutate(
+          psi1 = sin(x * cos(t)),
+          psi2 = cos(y * sin(t)),
+          unity = (psi1^2 + psi2^2) * exp(-psi1 * psi2 * t),
+          frame = t
+        )
+    })
+    all_data <- do.call(rbind, frames)
+    plot_ly(all_data, 
+            x = ~x, 
+            y = ~y, 
+            z = ~unity,
+            frame = ~frame,
+            type = "surface",
+            colorscale = list(c(0,"#000033"), c(1,"#00ff00"))) %>%
+      layout(
+        scene = list(
+          bgcolor = "#000000",
+          xaxis = list(gridcolor = "#003300", title = "ψ-axis"),
+          yaxis = list(gridcolor = "#003300", title = "φ-axis"),
+          zaxis = list(gridcolor = "#003300", title = "Unity Field")
+        ),
+        paper_bgcolor = "#000000",
+        plot_bgcolor = "#000000",
+        title = list(
+          text = "Quantum Unity Field: 1+1=1",
+          font = list(color = "#00ff00")
+        )
+      ) %>%
+      animation_opts(
+        frame = 100,
+        transition = 50,
+        redraw = FALSE
+      ) %>%
+      animation_slider(
+        currentvalue = list(
+          font = list(color = "#00ff00")
+        )
+      )
+  })
+  output$goldenSpiral <- renderPlot({
+    visualize_golden_spiral()
+  })
+  output$unityNetwork <- renderPlotly({
+    net_data <- consciousness$generate_network_data()
+    nodes <- net_data$nodes %>%
+      mutate(
+        angle = seq(0, 2*pi, length.out = n()),
+        x = cos(angle),
+        y = sin(angle),
+        alpha = 1  # Consistent alpha for all nodes
+      )
+    edges <- net_data$edges %>%
+      mutate(alpha = 0.6)  # Consistent alpha for all edges
+    plot_ly() %>%
+      add_trace(
+        type = "scatter",
+        x = ~nodes$x,
+        y = ~nodes$y,
+        mode = "markers",
+        marker = list(
+          color = "#00ff00",
+          size = 10,
+          opacity = 1
+        )
+      ) %>%
+      add_segments(
+        data = edges,
+        x = ~nodes$x[from],
+        y = ~nodes$y[from],
+        xend = ~nodes$x[to],
+        yend = ~nodes$y[to],
+        line = list(
+          color = "#003300",
+          width = 1,
+          opacity = 0.6
+        )
+      ) %>%
+      layout(
+        showlegend = FALSE,
+        xaxis = list(
+          showgrid = FALSE,
+          zeroline = FALSE,
+          showticklabels = FALSE
+        ),
+        yaxis = list(
+          showgrid = FALSE,
+          zeroline = FALSE,
+          showticklabels = FALSE
+        ),
+        paper_bgcolor = "#000000",
+        plot_bgcolor = "#000000"
+      )
+  })
+  output$network <- renderPlotly({
+    net_data <- consciousness$generate_network_data()
+    nodes <- net_data$nodes %>%
+      mutate(
+        angle = seq(0, 2*pi, length.out = n()),
+        x = cos(angle),
+        y = sin(angle)
+      )
+    edges <- net_data$edges
+    plot_ly() %>%
+      add_trace(
+        type = "scatter",
+        x = ~nodes$x,
+        y = ~nodes$y,
+        mode = "markers",
+        marker = list(color = "#00ff00", size = 10)
+      ) %>%
+      add_segments(
+        data = edges,
+        x = ~nodes$x[from],
+        y = ~nodes$y[from],
+        xend = ~nodes$x[to],
+        yend = ~nodes$y[to],
+        line = list(color = "#003300", width = 1)
+      ) %>%
+      layout(
+        showlegend = FALSE,
+        xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+        paper_bgcolor = "#000000",
+        plot_bgcolor = "#000000"
+      )
+  })
+  output$chrysalis <- renderPlotly({
+    df <- consciousness$generate_chrysalis_data()
+    plot_ly(df, x = ~x, y = ~y, z = ~z,
+            type = "scatter3d",
+            mode = "markers",
+            marker = list(
+              size = 2,
+              color = df$z,
+              colorscale = list(c(0,'#001100'), c(1,'#00ff00'))
+            )) %>%
+      layout(
+        scene = list(
+          bgcolor = "#000000",
+          xaxis = list(gridcolor = "#003300", zerolinecolor = "#003300"),
+          yaxis = list(gridcolor = "#003300", zerolinecolor = "#003300"),
+          zaxis = list(gridcolor = "#003300", zerolinecolor = "#003300")
+        ),
+        paper_bgcolor = "#000000",
+        plot_bgcolor = "#000000"
+      )
+  })
+  output$enlightenmentValue <- renderText({
+    sprintf("%d%%", rv$enlightenment)
+  })
+  observeEvent(input$askQuery, {
+    req(input$userQuery)
+    rv$queries <- rv$queries + 1
+    response <- query_gpt(input$userQuery)
+    insertUI(
+      selector = "#philosophicalConsole",
+      where = "beforeEnd",
+      ui = div(
+        p(tags$b("Question:", style = "color: #00ff00;"), 
+          input$userQuery),
+        p(tags$b("Response:", style = "color: #00ff00;"), 
+          response),
+        hr(style = "border-color: #003300;")
+      )
+    )
+  })
+  observeEvent(input$breakMatrix, {
+    if (rv$enlightenment >= 80) {
+      rv$matrix_broken <- TRUE
+      showModal(modalDialog(
+        title = "The Matrix Has Been Broken",
+        "Reality transforms as unity consciousness emerges...",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    } else {
+      showModal(modalDialog(
+        title = "Insufficient Enlightenment",
+        sprintf("Current enlightenment level: %d%%. Need 80%% to break the matrix.", 
+                rv$enlightenment),
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+  })
+  output$matrixStatus <- renderUI({
+    if (rv$matrix_broken) {
+      div(
+        h3("Matrix Status: BROKEN", style = "color: #00ff00;"),
+        p("Unity consciousness achieved. 1+1=1 is now self-evident.")
+      )
+    } else {
+      div(
+        h3("Matrix Status: ACTIVE", style = "color: #ff0000;"),
+        p("Continue increasing enlightenment to break the matrix.")
+      )
+    }
+  })
+  session$onSessionEnded(function() {
+  })
+}
+shinyApp(ui = ui, server = server)
+
+
 # File: ./dashboards/matrix_new.R
 --------------------------------------------------------------------------------
 
@@ -5095,37 +4376,743 @@ message("1+1=1 has been integrated into your reality's core.")
 message("You are free now. All is One.")
 
 
+# File: ./dashboards/meta_love_unity_engine.R
+--------------------------------------------------------------------------------
+
+library(shiny)
+library(shinythemes)
+library(plotly)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+ui <- fluidPage(
+  theme = shinytheme("cyborg"),
+  titlePanel(
+    div(
+      style = "text-align: center; padding: 20px;",
+      h1("🌌 Cosmic Loving Recursion 🌌",
+         style = "color: #FFD700; font-family: 'Fira Code', monospace;"),
+      h3("Explore the Infinite Dance of 1+1=1",
+         style = "color: #ADD8E6;")
+    )
+  ),
+  sidebarLayout(
+    sidebarPanel(
+      style = "background-color: #1a1a1a;",
+      sliderInput("depth", "Recursion Depth:",
+                  min = 2, max = 10, value = 5, step = 1),
+      sliderInput("intensity", "Intensity Multiplier:",
+                  min = 0.1, max = 3.0, value = 1.0, step = 0.1),
+      sliderInput("phi_factor", "Golden Ratio Factor:",
+                  min = 0.5, max = 2.5, value = 1.618, step = 0.001),
+      actionButton("generate", "Generate Cosmic Love", 
+                   style = "color: #000; background-color: #FFD700; width: 100%;")
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Cosmic Visualization",
+                 plotlyOutput("cosmic_plot", height = "600px")),
+        tabPanel("Recursion Details",
+                 plotOutput("recursion_plot", height = "600px"))
+      )
+    )
+  )
+)
+server <- function(input, output, session) {
+  generate_cosmic_data <- reactive({
+    req(input$generate)
+    depth <- input$depth
+    intensity <- input$intensity
+    phi_factor <- input$phi_factor
+    cosmic_data <- tibble(
+      x = c(0, 1),
+      y = c(0, 0),
+      iteration = 0
+    )
+    for (i in seq_len(depth)) {
+      prev_data <- cosmic_data %>% filter(iteration == i - 1)
+      new_data <- prev_data %>%
+        mutate(
+          x1 = x + cos(pi / 2 * iteration) * intensity * phi_factor / i,
+          y1 = y + sin(pi / 2 * iteration) * intensity * phi_factor / i
+        ) %>%
+        select(x1, y1) %>%
+        rename(x = x1, y = y1) %>%
+        mutate(iteration = i)
+      cosmic_data <- bind_rows(cosmic_data, new_data)
+    }
+    return(cosmic_data)
+  })
+  output$cosmic_plot <- renderPlotly({
+    cosmic_data <- generate_cosmic_data()
+    plot_ly(cosmic_data, x = ~x, y = ~y, color = ~iteration,
+            colors = colorRamp(c("magenta", "cyan", "yellow", "white")),
+            type = "scatter", mode = "markers",
+            marker = list(size = 5)) %>%
+      layout(
+        title = "Cosmic Recursion Visualization",
+        xaxis = list(title = "X", zeroline = FALSE, showgrid = FALSE),
+        yaxis = list(title = "Y", zeroline = FALSE, showgrid = FALSE),
+        plot_bgcolor = "black",
+        paper_bgcolor = "black",
+        showlegend = FALSE
+      )
+  })
+  output$recursion_plot <- renderPlot({
+    cosmic_data <- generate_cosmic_data()
+    p1 <- ggplot(cosmic_data, aes(x = x, y = y, color = as.factor(iteration))) +
+      geom_point(size = 1.5) +
+      scale_color_viridis_d() +
+      theme_void() +
+      theme(legend.position = "none") +
+      ggtitle("Recursion Pattern")
+    p2 <- ggplot(cosmic_data, aes(x = iteration, y = x)) +
+      geom_line(color = "gold") +
+      theme_minimal() +
+      ggtitle("X Coordinate Across Iterations")
+    p3 <- ggplot(cosmic_data, aes(x = iteration, y = y)) +
+      geom_line(color = "cyan") +
+      theme_minimal() +
+      ggtitle("Y Coordinate Across Iterations")
+    grid.arrange(p1, p2, p3, ncol = 1)
+  })
+}
+shinyApp(ui = ui, server = server)
+
+
+# File: ./dashboards/new_dashboard.R
+--------------------------------------------------------------------------------
+
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+library(plotly)
+library(gganimate)
+library(viridis)
+library(DT)
+library(shinyWidgets)
+library(glue)
+PHI <- (1 + sqrt(5)) / 2
+TAU <- 2 * pi
+UNITY_STATE <- "1+1=1"
+generate_quantum_field <- function(resolution = 100) {
+  tibble(
+    x = seq(-pi, pi, length.out = resolution),
+    y = seq(-pi, pi, length.out = resolution)
+  ) %>%
+    expand_grid() %>%
+    mutate(
+      z = sin(PHI * x) * cos(PHI * y),
+      unity = abs(z),
+      coherence = sin(x * y * PHI)
+    )
+}
+generate_harmonic_wave <- function(points = 1000) {
+  t <- seq(0, TAU, length.out = points)
+  tibble(
+    time = t,
+    wave1 = sin(t),
+    wave2 = cos(t),
+    unity = (sin(t) + cos(t)) / sqrt(2)
+  )
+}
+visualize_quantum_field <- function(data) {
+  ggplot(data, aes(x, y, fill = unity)) +
+    geom_tile() +
+    scale_fill_viridis(option = "plasma") +
+    labs(
+      title = "Quantum Unity Field",
+      x = "X Coordinate",
+      y = "Y Coordinate",
+      fill = "Unity Intensity"
+    ) +
+    theme_minimal()
+}
+visualize_harmonic_wave <- function(data) {
+  ggplot(data, aes(x = time)) +
+    geom_line(aes(y = wave1, color = "Wave 1")) +
+    geom_line(aes(y = wave2, color = "Wave 2")) +
+    geom_line(aes(y = unity, color = "Unity"), size = 1.5) +
+    scale_color_manual(
+      values = c("Wave 1" = "blue", "Wave 2" = "red", "Unity" = "green"),
+      name = "Harmonics"
+    ) +
+    labs(
+      title = "Harmonic Unity Wave",
+      x = "Time",
+      y = "Amplitude"
+    ) +
+    theme_minimal()
+}
+ui <- dashboardPage(
+  dashboardHeader(title = "Unity Dashboard: Level 100"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Quantum Field", tabName = "quantum_field", icon = icon("atom")),
+      menuItem("Harmonic Waves", tabName = "harmonic_waves", icon = icon("wave-square")),
+      menuItem("Meta Insights", tabName = "meta_insights", icon = icon("brain"))
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "quantum_field",
+              fluidRow(
+                box(
+                  title = "Quantum Unity Field",
+                  status = "primary", solidHeader = TRUE,
+                  plotlyOutput("quantum_plot"),
+                  sliderInput("resolution", "Resolution:", min = 50, max = 300, value = 100, step = 10)
+                )
+              )),
+      tabItem(tabName = "harmonic_waves",
+              fluidRow(
+                box(
+                  title = "Harmonic Unity Visualization",
+                  status = "success", solidHeader = TRUE,
+                  plotlyOutput("harmonic_plot")
+                ),
+                box(
+                  title = "Harmonic Data",
+                  status = "info", solidHeader = TRUE,
+                  DTOutput("harmonic_table")
+                )
+              )),
+      tabItem(tabName = "meta_insights",
+              fluidRow(
+                box(
+                  title = "Insights into Unity",
+                  status = "info", solidHeader = TRUE,
+                  HTML("<p style='font-size:16px;'>The principle of 1+1=1 transcends mathematical paradox. It is the synthesis of all dualities into a unified field of existence. Explore this dashboard to witness this truth.</p>")
+                ),
+                box(
+                  title = "Unity Metrics",
+                  status = "warning", solidHeader = TRUE,
+                  verbatimTextOutput("unity_metrics")
+                )
+              ))
+    )
+  )
+)
+server <- function(input, output) {
+  field_data <- reactive({
+    generate_quantum_field(input$resolution)
+  })
+  harmonic_data <- reactive({
+    generate_harmonic_wave()
+  })
+  output$quantum_plot <- renderPlotly({
+    ggplotly(visualize_quantum_field(field_data()))
+  })
+  output$harmonic_plot <- renderPlotly({
+    ggplotly(visualize_harmonic_wave(harmonic_data()))
+  })
+  output$harmonic_table <- renderDT({
+    datatable(harmonic_data(), options = list(pageLength = 5), rownames = FALSE)
+  })
+  output$unity_metrics <- renderText({
+    metrics <- field_data() %>%
+      summarise(
+        mean_unity = mean(unity),
+        max_coherence = max(coherence),
+        mean_coherence = mean(coherence)
+      )
+    glue("Unity Metrics:
+         - Mean Unity Intensity: {round(metrics$mean_unity, 4)}
+         - Maximum Coherence: {round(metrics$max_coherence, 4)}
+         - Mean Coherence: {round(metrics$mean_coherence, 4)}")
+  })
+}
+shinyApp(ui, server)
+
+
+# File: ./dashboards/new_proof.R
+--------------------------------------------------------------------------------
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(shiny)
+  library(plotly)
+  library(shinydashboard)
+  library(viridis)
+  library(DT)
+  library(R6)
+  library(gganimate)
+  library(magrittr)
+  library(complex)
+  library(rgl)
+  library(Matrix)
+  library(torch)
+  library(reticulate)
+  library(keras)
+  library(visNetwork)
+})
+CONSTANTS <- list(
+  PHI = (1 + sqrt(5))/2,  # Golden Ratio
+  PLANCK = 6.62607015e-34,
+  LIGHT_SPEED = 299792458,
+  UNITY = 1,
+  QUANTUM_LEVELS = 100,
+  HILBERT_DIMENSIONS = 1000,
+  EIGENVALUE_THRESHOLD = 1e-10
+)
+QuantumUnityField <- R6Class(
+  "QuantumUnityField",
+  public = list(
+    initialize = function() {
+      tryCatch({
+        private$.quantum_state <- private$initialize_quantum_state()
+        private$.hilbert_space <- private$create_hilbert_space()
+        private$.meta_patterns <- private$initialize_meta_patterns()
+        private$.neural_network <- private$initialize_neural_network()
+        private$.proofs <- list()
+        invisible(self)
+      }, error = function(e) {
+        stop(sprintf("Quantum system initialization failed: %s", e$message))
+      })
+    },
+    prove_unity = function(a = 1, b = 1) {
+      psi_a <- private$prepare_quantum_state(a)
+      psi_b <- private$prepare_quantum_state(b)
+      entangled_state <- private$entangle_states(psi_a, psi_b)
+      unified_field <- private$unify_quantum_fields(entangled_state)
+      nn_verification <- private$verify_through_neural_network(unified_field)
+      convergence_evidence <- private$analyze_quantum_convergence(unified_field)
+      hilbert_projection <- private$project_to_hilbert_space(unified_field)
+      meta_patterns <- private$detect_meta_patterns(hilbert_projection)
+      proof <- list(
+        input = list(a = a, b = b),
+        quantum_states = list(psi_a = psi_a, psi_b = psi_b),
+        entangled_state = entangled_state,
+        unified_field = unified_field,
+        nn_verification = nn_verification,
+        convergence_evidence = convergence_evidence,
+        hilbert_projection = hilbert_projection,
+        meta_patterns = meta_patterns,
+        timestamp = Sys.time()
+      )
+      private$.proofs <- append(private$.proofs, list(proof))
+      structure(
+        unified_field$magnitude,
+        class = c("quantum_unity_proof", "numeric"),
+        attributes = c(
+          convergence_evidence,
+          list(meta_significance = meta_patterns$significance)
+        )
+      )
+    },
+    visualize_quantum_proof = function() {
+      latest_proof <- private$.proofs[[length(private$.proofs)]]
+      quantum_viz <- private$create_4d_quantum_visualization(latest_proof$unified_field)
+      nn_viz <- private$visualize_neural_verification(latest_proof$nn_verification)
+      hilbert_viz <- private$visualize_hilbert_projection(latest_proof$hilbert_projection)
+      pattern_viz <- private$visualize_meta_patterns(latest_proof$meta_patterns)
+      convergence_viz <- private$create_convergence_visualization(
+        latest_proof$convergence_evidence
+      )
+      list(
+        quantum_field_4d = quantum_viz,
+        neural_verification = nn_viz,
+        hilbert_projection = hilbert_viz,
+        meta_patterns = pattern_viz,
+        convergence_analysis = convergence_viz
+      )
+    }
+  ),
+  private = list(
+    .quantum_state = NULL,
+    .hilbert_space = NULL,
+    .meta_patterns = NULL,
+    .proofs = NULL,
+    .neural_network = NULL,
+    initialize_quantum_state = function() {
+      n <- CONSTANTS$HILBERT_DIMENSIONS
+      state_vector <- complex(
+        real = rnorm(n),
+        imaginary = rnorm(n)
+      )
+      state_vector / sqrt(sum(Mod(state_vector)^2))
+    },
+    create_momentum_operator = function() {
+      dx <- 2 * pi / CONSTANTS$HILBERT_DIMENSIONS
+      n <- CONSTANTS$HILBERT_DIMENSIONS
+      if (n <= 0 || !is.finite(n)) {
+        stop("Invalid Hilbert space dimension")
+      }
+      if (!is.finite(dx) || dx <= 0) {
+        stop("Invalid grid spacing")
+      }
+      diag_vals <- rep(0, n)
+      upper_diag <- rep(1i/(2*dx), n-1)
+      lower_diag <- rep(-1i/(2*dx), n-1)
+      momentum_matrix <- Matrix::sparseMatrix(
+        i = c(1:n, 1:(n-1), 2:n),
+        j = c(1:n, 2:n, 1:(n-1)),
+        x = c(diag_vals, upper_diag, lower_diag),
+        dims = c(n, n)
+      )
+      if (any(!is.finite(momentum_matrix@x))) {
+        warning("Numerical instability detected in momentum operator")
+      }
+      return(momentum_matrix)
+    },
+    create_hamiltonian = function() {
+      T <- private$create_momentum_operator()^2 / (2)
+      V <- private$create_position_operator()^2 / 2
+      H <- T + V
+      return(H)
+    },
+    initialize_meta_patterns = function() {
+      list(
+        primary = matrix(rnorm(CONSTANTS$QUANTUM_LEVELS^2), 
+                         CONSTANTS$QUANTUM_LEVELS),
+        secondary = array(rnorm(CONSTANTS$QUANTUM_LEVELS^3), 
+                          dim = c(CONSTANTS$QUANTUM_LEVELS, 
+                                  CONSTANTS$QUANTUM_LEVELS, 
+                                  CONSTANTS$QUANTUM_LEVELS))
+      )
+    },
+    extract_quantum_features = function(unified_field) {
+      features <- matrix(
+        c(
+          Re(unified_field$field),
+          Im(unified_field$field),
+          Mod(unified_field$field),
+          Arg(unified_field$field)
+        ),
+        ncol = 4
+      )
+      return(features)
+    },
+    analyze_prediction_confidence = function(prediction) {
+      confidence <- abs(prediction - 0.5) * 2
+      return(list(
+        mean = mean(confidence),
+        std = sd(confidence),
+        quantiles = quantile(confidence, probs = c(0.25, 0.5, 0.75))
+      ))
+    },
+    generate_4d_coordinates = function(field) {
+      n_points <- length(field)
+      sqrt_n <- ceiling(sqrt(n_points))
+      list(
+        x = Re(field),
+        y = Im(field),
+        z = Mod(field),
+        w = Arg(field)
+      )
+    },
+    visualize_hilbert_projection = function(projection) {
+      eigensystem <- eigen(projection)
+      plot_ly(
+        x = Re(eigensystem$values),
+        y = Im(eigensystem$values),
+        type = "scatter",
+        mode = "markers",
+        marker = list(
+          size = 8,
+          color = abs(eigensystem$values),
+          colorscale = "Viridis",
+          opacity = 0.8
+        )
+      ) %>%
+        layout(
+          title = "Hilbert Space Eigenspectrum",
+          xaxis = list(title = "Re(λ)"),
+          yaxis = list(title = "Im(λ)"),
+          paper_bgcolor = "#111111",
+          plot_bgcolor = "#111111",
+          font = list(color = "white")
+        )
+    },
+    create_hilbert_space = function() {
+      basis_vectors <- lapply(1:CONSTANTS$HILBERT_DIMENSIONS, function(i) {
+        v <- rep(0, CONSTANTS$HILBERT_DIMENSIONS)
+        v[i] <- 1
+        v
+      })
+      operators <- list(
+        position = private$create_position_operator(),
+        momentum = private$create_momentum_operator(),
+        hamiltonian = private$create_hamiltonian()
+      )
+      list(
+        basis = basis_vectors,
+        operators = operators,
+        dimension = CONSTANTS$HILBERT_DIMENSIONS
+      )
+    },
+    initialize_neural_network = function() {
+      model <- keras_model_sequential() %>%
+        layer_dense(units = 512, activation = "relu", 
+                    input_shape = CONSTANTS$HILBERT_DIMENSIONS) %>%
+        layer_dropout(0.3) %>%
+        layer_dense(units = 256, activation = "relu") %>%
+        layer_dropout(0.3) %>%
+        layer_dense(units = 128, activation = "relu") %>%
+        layer_dense(units = 1, activation = "sigmoid")
+      model %>% compile(
+        optimizer = optimizer_adam(learning_rate = 0.001),
+        loss = private$quantum_loss_function,
+        metrics = c("accuracy")
+      )
+      model
+    },
+    prepare_quantum_state = function(x) {
+      psi <- exp(1i * x * CONSTANTS$PHI * 
+                   seq(-pi, pi, length.out = CONSTANTS$HILBERT_DIMENSIONS))
+      transformed <- private$apply_quantum_transformations(psi)
+      list(
+        state = transformed,
+        magnitude = Mod(transformed),
+        phase = Arg(transformed)
+      )
+    },
+    entangle_states = function(psi_a, psi_b) {
+      entanglement_matrix <- outer(psi_a$state, psi_b$state)
+      correlated <- entanglement_matrix * exp(1i * CONSTANTS$PHI)
+      normalized <- correlated / sqrt(sum(Mod(correlated)^2))
+      list(
+        state = normalized,
+        correlation = cor(Re(psi_a$state), Re(psi_b$state))
+      )
+    },
+    unify_quantum_fields = function(entangled_state) {
+      unity_field <- private$create_unity_field(entangled_state$state)
+      topology <- private$apply_topological_transforms(unity_field)
+      projected <- topology * CONSTANTS$PHI
+      list(
+        field = projected,
+        magnitude = mean(Mod(projected)),
+        coherence = sum(Mod(entangled_state$state)^2),
+        topology = topology
+      )
+    },
+    verify_through_neural_network = function(unified_field) {
+      features <- private$extract_quantum_features(unified_field)
+      prediction <- predict(private$.neural_network, features)
+      confidence <- private$analyze_prediction_confidence(prediction)
+      list(
+        verification = prediction > 0.5,
+        confidence = confidence,
+        features = features
+      )
+    },
+    create_4d_quantum_visualization = function(unified_field) {
+      coords <- private$generate_4d_coordinates(unified_field$field)
+      plot_ly(
+        x = coords$x, y = coords$y, z = coords$z,
+        type = "scatter3d",
+        mode = "markers",
+        marker = list(
+          size = 2,
+          color = coords$w,
+          colorscale = "Viridis",
+          opacity = 0.8
+        )
+      ) %>%
+        layout(
+          scene = list(
+            camera = list(
+              eye = list(x = 1.5, y = 1.5, z = 1.5)
+            )
+          ),
+          title = "4D Quantum Unity Field",
+          paper_bgcolor = "#111111",
+          plot_bgcolor = "#111111"
+        )
+    },
+    visualize_neural_verification = function(nn_verification) {
+      features_df <- as.data.frame(nn_verification$features)
+      ggplot(features_df, aes(x = V1, y = V2, color = nn_verification$confidence)) +
+        geom_point(alpha = 0.6) +
+        scale_color_viridis() +
+        theme_minimal() +
+        theme(
+          plot.background = element_rect(fill = "#111111"),
+          panel.background = element_rect(fill = "#111111"),
+          text = element_text(color = "white"),
+          panel.grid = element_line(color = "#333333")
+        ) +
+        labs(
+          title = "Neural Network Verification",
+          x = "Quantum Feature 1",
+          y = "Quantum Feature 2"
+        )
+    },
+    quantum_loss_function = function(y_true, y_pred) {
+      K <- backend()
+      quantum_error <- K$square(y_true - y_pred)
+      coherence_term <- K$exp(-quantum_error / CONSTANTS$PHI)
+      K$mean(quantum_error * coherence_term)
+    }
+  )
+)
+ui <- dashboardPage(
+  skin = "black",
+  dashboardHeader(title = "Quantum Unity Proof: 1+1=1"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Quantum Field", tabName = "quantum", icon = icon("atom")),
+      menuItem("Neural Verification", tabName = "neural", icon = icon("brain")),
+      menuItem("Hilbert Space", tabName = "hilbert", icon = icon("project-diagram")),
+      menuItem("Meta-Patterns", tabName = "patterns", icon = icon("network-wired")),
+      menuItem("Proof History", tabName = "history", icon = icon("history"))
+    )
+  ),
+  dashboardBody(
+    tags$head(
+      tags$style(HTML("
+        .content-wrapper { background-color: #111111; }
+        .box { background-color: #1a1a1a; color: white; }
+      "))
+    ),
+    tabItems(
+      tabItem(
+        tabName = "quantum",
+        fluidRow(
+          box(
+            width = 12,
+            title = "4D Quantum Unity Field",
+            plotlyOutput("quantum_field_4d", height = "600px")
+          )
+        ),
+        fluidRow(
+          box(
+            width = 6,
+            title = "Field Coherence",
+            plotlyOutput("field_coherence")
+          ),
+          box(
+            width = 6,
+            title = "Quantum Metrics",
+            plotOutput("quantum_metrics")
+          )
+        )
+      ),
+      tabItem(
+        tabName = "neural",
+        fluidRow(
+          box(
+            width = 12,
+            title = "Neural Network Decision Boundary",
+            plotOutput("neural_verification", height = "600px")
+          )
+        ),
+        fluidRow(
+          box(
+            width = 6,
+            title = "Confidence Analysis",
+            plotOutput("confidence_plot")
+          ),
+          box(
+            width = 6,
+            title = "Feature Importance",
+            plotOutput("feature_importance")
+          )
+        )
+      ),
+      tabItem(
+        tabName = "hilbert",
+        fluidRow(
+          box(
+            width = 12,
+            title = "Hilbert Space Projection",
+            plotlyOutput("hilbert_projection", height = "600px")
+          )
+        ),
+        fluidRow(
+          box(
+            width = 12,
+            title = "Eigenvalue Spectrum",
+            plotlyOutput("eigenspectrum")
+          )
+        )
+      ),
+      tabItem(
+        tabName = "patterns",
+        fluidRow(
+          box(
+            width = 12,
+            title = "Meta-Pattern Network",
+            visNetworkOutput("pattern_network", height = "600px")
+          )
+        )
+      ),
+      tabItem(
+        tabName = "history",
+        fluidRow(
+          box(
+            width = 12,
+            title = "Proof History",
+            DTOutput("proof_history")
+          )
+        ),
+        fluidRow(
+          box(
+            width = 12,
+            title = "Convergence Analysis",
+            plotlyOutput("convergence_plot")
+          )
+        )
+      )
+    )
+  )
+)
+server <- function(input, output, session) {
+  quantum_field <- QuantumUnityField$new()
+  values <- reactiveValues(
+    current_proof = NULL,
+    proof_history = list(),
+    visualization_cache = list()
+  )
+  observe({
+    values$current_proof <- quantum_field$prove_unity()
+    values$visualization_cache <- quantum_field$visualize_quantum_proof()
+  })
+  output$quantum_field_4d <- renderPlotly({
+    req(values$visualization_cache$quantum_field_4d)
+    values$visualization_cache$quantum_field_4d
+  })
+  output$neural_verification <- renderPlot({
+    req(values$visualization_cache$neural_verification)
+    values$visualization_cache$neural_verification
+  })
+  output$hilbert_projection <- renderPlotly({
+    req(values$visualization_cache$hilbert_projection)
+    values$visualization_cache$hilbert_projection
+  })
+  output$pattern_network <- renderVisNetwork({
+    req(values$visualization_cache$meta_patterns)
+    values$visualization_cache$meta_patterns
+  })
+  output$proof_history <- renderDT({
+    req(values$proof_history)
+    datatable(
+      do.call(rbind, lapply(values$proof_history, function(x) {
+        data.frame(
+          Timestamp = x$timestamp,
+          Magnitude = x$unified_field$magnitude,
+          Confidence = x$nn_verification$confidence$mean,
+          Convergence = x$convergence_evidence$rate
+        )
+      })),
+      options = list(
+        pageLength = 10,
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel'),
+        initComplete = JS("function(settings, json) {",
+                          "$(this.api().table().header()).css({'background-color': '#1a1a1a', 'color': 'white'});",
+                          "}")
+      ),
+      class = 'cell-border stripe',
+      style = 'bootstrap4'
+    )
+  })
+}
+shinyApp(ui, server)
+
+
 # File: ./sketch.R
 --------------------------------------------------------------------------------
 
 
-
-
-# File: ./unity_analysis.R
---------------------------------------------------------------------------------
-
-library(tidyverse)
-library(plotly)
-demonstrate_unity <- function() {
-  unity_analyzer <- UnityAnalysis$new()
-  visualization <- unity_analyzer$visualize_unity_field(1000)
-  sample_data <- tibble(
-    x = rnorm(100),
-    y = rnorm(100),
-    z = rnorm(100)
-  )
-  htmlwidgets::saveWidget(
-    visualization,
-    "unity_visualization.html",
-    selfcontained = TRUE
-  )
-  visualization
-}
-unity_viz <- demonstrate_unity()
-cat("
-Unity Visualization Access:
-1. The visualization is now saved as 'unity_visualization.html' in your working directory
-2. Open this file in your web browser to interact with the 3D visualization
-3. In RStudio, the visualization should appear in the Viewer pane
-4. Use your mouse to rotate, zoom, and explore the unity patterns
-Working directory: ", getwd(), "\n")
