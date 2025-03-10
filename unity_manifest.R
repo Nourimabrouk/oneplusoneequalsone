@@ -13,7 +13,7 @@ setClass("unity_manifestation",
 # Define the show method
 setMethod("show", "unity_manifestation",
           function(object) {
-            cat("Unity Manifestation\n")S
+            cat("Unity Manifestation\n")
             cat("Quantum Signature:", object@quantum_signature, "\n")
             cat("Dimensions:", length(object), "\n")
             cat("Topology:", paste(names(object@topology), collapse = ", "), "\n")
